@@ -1,0 +1,9 @@
+*~
+*.pyc
+local/*
+assets/*
+cmd.bat
+*/temp.*
+myproject/website/static/website/_/*
+*.db
+.commit
