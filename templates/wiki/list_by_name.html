@@ -1,0 +1,17 @@
+﻿{% extends "wiki/base.html" %}
+
+{% block main-content %}
+<h1 id="title">Pages by Name</h1>
+<div id="content">
+    <ul>
+        {% for dir in pg_walk.1 %}
+        <li>» <a href="{% url wiki_show dir %}">{{ dir }}</a></li>
+        {% endfor %}
+    </ul>
+    <ul>
+        {% for pg in pg_walk.2 %}
+        <li><a href="{% url wiki_show pg %}">{{ pg }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
