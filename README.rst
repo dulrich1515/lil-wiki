@@ -1,5 +1,5 @@
-﻿wiki
-====
+my-lil-wiki
+===========
 
 My Django based wiki.
 
