@@ -22,7 +22,7 @@
 {% endblock %}
 
 {% block main-content %}
-<div{% if user.is_staff %} ondblclick="location.href='{% url oldwiki_edit page.title %}';"{% endif %}>
+<div{% if user.is_staff %} ondblclick="location.href='{% url wiki_edit page.title %}';"{% endif %}>
 <h1 id="title">{{ page.title }}</h1>
 <div id="content">
 {{ page.content|rst2html }}
