@@ -58,13 +58,21 @@ def post(request):
         title = re.sub('[^\w^\/]+', '', title) # poor man's validation attempt
         content = request.POST['content']
         content = content.replace('\r\n','\n')
-        
-        if 'cancel' not in request.POST:
-            if '/' in title:
-                check_path(title)
 
-            page = Page(title)
-            page.save(content)
+        page = Page(title)
+
+        if 'cancel' in request.POST:
+            return redirect('wiki_show', pg)
+
+        elif 'delete' in request.POST:
+            if os.path.isfile(page.fp): # delete only files for now...
+                os.remove(page.fp)
+            return redirect('wiki_root')
+        
+        elif 'update' in request.POST or 'submit' in request.POST:
+            if '/' in title:
+                check_path(title) 
+            page.save(content) # shouldn't check_path be in page.save?
             
             if title.lower() != pg.lower(): # case-sensitivity issue here?
             # then title was changed ... need to delete old file
@@ -72,10 +80,10 @@ def post(request):
                 if os.path.isfile(fp):
                     os.remove(fp)
                     
-        if 'update' in request.POST:
-            return redirect('wiki_edit', title)
-        else:
-            return redirect('wiki_show', title)
+            if 'update' in request.POST:
+                return redirect('wiki_edit', title)
+            else:
+                return redirect('wiki_show', title)
 
     # nothing should get here...
     return redirect('wiki_root')
