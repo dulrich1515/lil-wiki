@@ -7,9 +7,12 @@ import views
 
 urlpatterns = patterns('',
     url(r'^wiki/$', views.show, name='wiki_root'),
+    url(r'^wiki/show/([-\w\/]{2,})/$', views.show, name='wiki_show'),
+    url(r'^wiki/edit/([-\w\/]{2,})/$', views.edit, name='wiki_edit'),
+
     url(r'^wiki/list/$', views.list_by_name, name='wiki_list'),
-    
-    url(r'^wiki/([-\w\/]{2,})/$', views.show, name='wiki_show'),
+    url(r'^wiki/post/$', views.post, name='wiki_post'),
+    url(r'^wiki/edit/$', views.edit, name='wiki_edit_new'),    
 
     url(r'^wiki/.*/$', redirect_to, {'url': '/wiki/'}),
 )

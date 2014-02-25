@@ -18,14 +18,18 @@ class Page(object):
             self.fp = os.path.join(self.fp, '_')
             
     @property
-    def content(self, toc=False):    
-        content = ''        
-
-        # Open file to pull raw content
+    def raw_content(self):
+        raw_content = ''
         if os.path.isfile(self.fp):
             f = codecs.open(self.fp, 'r', 'utf-8')
-            content = f.read()
+            raw_content = f.read()
             f.close()
+        return raw_content
+    
+            
+    @property
+    def content(self, toc=False):    
+        content = self.raw_content
 
         # Allows renaming of auto-links to wiki pages
         pattern = r'`(.+) <<([\w\/]+)>>`_'

@@ -1,0 +1,24 @@
+{% extends "wiki/layout.html" %}
+
+{% block html-head %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}wiki/css/editor.css">
+    
+    <script src="{{ STATIC_URL }}wiki/js/jquery-1.8.3.min.js"></script>
+    <script src="{{ STATIC_URL }}wiki/js/editor.js"></script>
+{% endblock %}
+
+{% block main-content %}
+<form id="editor" method="post" action="{% url wiki_post %}">
+    <textarea class="editarea" id="content" name="content">{{ page.raw_content }}</textarea>
+    <input type="text" class="editarea" id="title" name="title" value="{{ page.title }}">
+
+    <ul id="controls">
+        <li><input id="submit" type="submit" name="submit" value="Submit"></li>
+        <li><input id="update" type="submit" name="update" value="Update"></li>
+        <li><input id="cancel" type="submit" name="cancel" value="Cancel"></li>
+    </ul>
+
+    <input type="hidden" name="pg" value="{{ page.title }}">
+    {% csrf_token %}
+</form>
+{% endblock %}

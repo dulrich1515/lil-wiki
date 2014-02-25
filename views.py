@@ -26,10 +26,28 @@ def show(request, pg='_'):
     page = Page(pg)
     if pg == '_' and not page.content:
         return list_by_name(request)
-    
         
     context = {
         'page' : page,
     }
     template = 'wiki/show.html'
     return render_to_response(request, template, context)
+
+    
+def edit(request, pg=''): 
+# blank will create a *new* page --- how to edit WikiRoot page?
+
+    if not request.user.is_staff:
+        return redirect('wiki_root')
+ 
+    page = Page(pg)
+
+    context = {
+        'page' : page,
+    }
+    template = 'wiki/edit.html'
+    return render_to_response(request, template, context)
+    
+    
+def post(request): 
+    pass

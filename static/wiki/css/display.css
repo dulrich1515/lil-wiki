@@ -9,40 +9,51 @@ body {
     background:white url(../img/back.png) repeat-x;
     max-width:100%;
 }
+
 a { 
     color:blue; 
     text-decoration:none; 
-}    
+}
+    
 a:hover { 
     text-decoration:underline;
 }
+
 h2 { 
     margin:0 -0.75em;
     padding:0.70em;
     background:#e6eefe; 
 }
-h3 {
-}
-h4 { font-style:italic;}table {
+
+h3 {}
+h4 { font-style:italic;}
+
+table {
     border:1px solid #eee;
 }
+
 td {
     padding:2px;
     border:1px solid #eee;
 }
+
 hr {
     border:0pt;
     background:white url(../img/squig.png) no-repeat;
     height:10px;
-}acronym { 
+}
+
+acronym { 
     border-bottom:1px dotted #f00; 
 }
+
 blockquote, pre, .sidebar {
     padding:0.5em 0.8em;
     margin:1em;
     background-color:#fff;
     border:1px solid #eee;
 }
+
 blockquote {
     background-image:url(../img/lq.png);
     background-position:top left;
@@ -52,14 +63,17 @@ blockquote {
 /*    border-top:0; */
 /*    border-left:0; */
 /*    -moz-border-radius:9px; */
-}.author {
+}
+.author {
     float:right;
     font-style:italic;
 }
+
 pre {
     font-family:monospace;
     overflow:auto;
 }
+
 .l { text-align: left; }
 .c { text-align: center; }
 .r { text-align: right; }
@@ -71,7 +85,8 @@ pre {
 #title { 
     overflow-x:scroll;
     margin:1.2em 0 0.3em 0;
-    }#title::-webkit-scrollbar { 
+    }
+#title::-webkit-scrollbar { 
     display: none; 
 }    
 
@@ -83,6 +98,7 @@ pre {
     border:1px solid white; 
     background:#fff;
 }
+
 #controls { 
     padding:0.5em;
     position:fixed;
@@ -94,17 +110,21 @@ pre {
     border-bottom:1px solid #fff;
     text-align:right;
 }
+
 #controls div {
     text-align:right;
 }
+
 #controls h2 {
     display:none;
 }
+
 #controls ul {
     padding:0;
     margin:0;
     list-style:none; 
 }
+
 #controls ul li { 
     padding:0;
     margin:0;
@@ -116,6 +136,7 @@ pre {
     border:1px solid transparent; 
     display:block;
 }
+
 #controls a:hover { 
     border-left:1px solid #fff;
     border-top:1px solid #fff;
@@ -123,6 +144,7 @@ pre {
     border-bottom:1px solid #aaa;
     text-decoration:none;
 }
+
 #footer {
     clear:both;
     text-align:center;
@@ -140,6 +162,7 @@ pre {
     background-position:top=2px left;
     background-repeat:no-repeat;
 }
+
 .footnote {
     width:100%;
 }
@@ -150,6 +173,7 @@ pre {
     width:2em;
     vertical-align:top;
 }
+
 #table-of-contents {
     padding:1em;
     padding-bottom:0;
@@ -159,6 +183,7 @@ pre {
     -moz-border-radius:9px; 
     background:#E6EEFE;
 }
+
 .clickable {
     padding:1em;
     background:#def;
@@ -166,9 +191,11 @@ pre {
     border-bottom:1px solid #888;
     border:1px solid #888;
 }
+
 .align-center {
     text-align:center;    
 }
+
 .my-docutils.fig {
     padding:1em;
     background:#fff;
@@ -198,15 +225,16 @@ pre {
     margin:1em auto;
 }
 .my-docutils.tbl.default table {
- 
-   margin:1em auto;
+    margin:1em auto;
 }
 .my-docutils.tbl th,
 .my-docutils.tbl td {
     padding:0 5px;
 }
+
 .my-docutils img,
-.my-docutils video {
+.my-docutils video
+ {
     max-width:100%;
 	height:auto;
 	-ms-interpolation-mode: bicubic;
@@ -230,4 +258,5 @@ pre {
         max-width:45%;
     }
 }
+
 
