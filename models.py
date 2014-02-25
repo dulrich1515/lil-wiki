@@ -49,6 +49,12 @@ class Page(object):
             
         return content
         
+    def save(self, content):
+        f = codecs.open(self.fp, 'w+', 'utf-8')
+        f.write(content.strip())
+        f.close
+
+        
     def get_parent(self):
         return None
         
