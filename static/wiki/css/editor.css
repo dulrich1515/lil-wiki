@@ -22,7 +22,10 @@ body {
     top:40px;
     bottom:0px;
 }
-#controls {
+#controls h2 {
+    display:none;
+}
+#controls ul{
     position:absolute;
     top:40px;
     right:0;
@@ -35,10 +38,10 @@ body {
     transition:width 100ms;
     -webkit-transition:width 100ms; /* Safari */
 }
-#controls:hover {
+#controls ul:hover {
     width:9em !important;
 }
-#controls::-webkit-scrollbar { 
+#controls ul::-webkit-scrollbar { 
     display: none; 
 }    
 #controls li{

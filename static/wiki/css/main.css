@@ -34,7 +34,8 @@ hr {
     border:0pt;
     background:white url(../img/squig.png) no-repeat;
     height:10px;
-}acronym { 
+}
+acronym { 
     border-bottom:1px dotted #f00; 
 }
 blockquote, pre, .sidebar {
@@ -94,9 +95,6 @@ pre {
     border-bottom:1px solid #fff;
     text-align:right;
 }
-#controls div {
-    text-align:right;
-}
 #controls h2 {
     display:none;
 }
@@ -105,11 +103,13 @@ pre {
     margin:0;
     list-style:none; 
 }
-#controls ul li { 
+#controls:hover ul {
+    display:block !important;
+}
+#controls li { 
     padding:0;
     margin:0;
 } 
-
 #controls a { 
     padding:0 1em;
     margin:0;
@@ -125,96 +125,6 @@ pre {
 }
 #footer {
     clear:both;
-    text-align:center;
-}
-
-/******************/
-/* Docutils stuff */
-/******************/
-
-.sidebar, .admonition {
-    border:0;
-    margin:2px;
-    font-size:0.8em;
-    background-image:url(../img/ast.png);
-    background-position:top=2px left;
-    background-repeat:no-repeat;
-}
-.footnote {
-    width:100%;
-}
-.footnote td {
-    vertical-align:baseline;
-}
-.footnote td.label {
-    width:2em;
-    vertical-align:top;
-}
-#table-of-contents {
-    padding:1em;
-    padding-bottom:0;
-    margin:1em 0;
-    border:1px solid #BBBBFF; 
-    background:#fff;
-    -moz-border-radius:9px; 
-    background:#E6EEFE;
-}
-.clickable {
-    padding:1em;
-    background:#def;
-    border-right:1px solid #444;
-    border-bottom:1px solid #888;
-    border:1px solid #888;
-}
-.align-center {
-    text-align:center;    
-}
-.my-docutils.fig {
-    padding:1em;
-    background:#fff;
-    border:1px solid #ccc;
-    margin:1em auto;
-}
-.my-docutils.fig p {
-    margin-bottom:0;
-}
-.my-docutils.plt {
-    background:#fff;
-}
-.my-docutils.plt,
-.my-docutils.ani {
-    padding:1em;
-    border:1px solid #ccc;
-    margin:1em auto;
-}
-.my-docutils.plt p,
-.my-docutils.ani p {
-    margin-bottom:0;
-}
-.my-docutils.tbl table {
-    padding:1em;
-    background:#fff;
-    border:1px solid #ccc;
-    margin:1em auto;
-}
-.my-docutils.tbl.default table {
- 
-   margin:1em auto;
-}
-.my-docutils.tbl th,
-.my-docutils.tbl td {
-    padding:0 5px;
-}
-.my-docutils img,
-.my-docutils video {
-    max-width:100%;
-	height:auto;
-	-ms-interpolation-mode: bicubic;
-}
-.my-docutils.fig,
-.my-docutils.plt,
-.my-docutils.ani,
-.my-docutils.tbl {
     text-align:center;
 }
 
