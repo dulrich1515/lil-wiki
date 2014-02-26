@@ -19,9 +19,9 @@
     <h2>Page Controls</h2>
     <ul id="control_list">
         {% if user.is_staff %}
-        <li><a href="{% url wiki_logout %}?next={% url wiki_show page.pg %}">Logout</a></li>
+        <li><a href="{% url wiki_logout %}?next={% url wiki_root %}">Logout</a></li>
         {% else %}
-        <li><a href="{% url wiki_login %}?next={% url wiki_show page.pg %}">Login</a></li>
+        <li><a href="{% url wiki_login %}?next={% url wiki_root %}">Login</a></li>
         {% endif %}
         {% if user.is_staff %}
         <li><a href="{% url wiki_edit_new %}">New Page</a></li>
