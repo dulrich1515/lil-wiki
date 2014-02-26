@@ -18,10 +18,30 @@ $(document).keydown(function(e) {
 
 {% block main-content %}
 <div{% if user.is_staff %} ondblclick="location.href='{% url wiki_edit page.title %}';"{% endif %}>
-<h1 id="title">{{ page.title }}</h1>
-<div id="content">
-{{ page.content|rst2html }}
+    <h1 id="title">{{ page.title }}</h1>
+    <div id="content">
+    {{ page.content|rst2html }}
+    </div>
 </div>
+    
+<div id="related-pages">
+    <h2>Related Pages</h2>
+    <p>Up to&hellip;</p>
+    <ul>
+        <li>{{ page.parent }}</li>
+    </ul>
+    <p>Down to&hellip;</p>
+    <ul>
+        {% for child in page.children %}
+        <li>{{ child }}</li>
+        {% endfor %}
+    </ul>
+    <p>Sideways&hellip;</p>
+    <ul>
+        {% for sibling in page.siblings %}
+        <li>{{ sibling }}</li>
+        {% endfor %}
+    </ul>
 </div>
 
 <div id="controls">

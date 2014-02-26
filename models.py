@@ -49,17 +49,20 @@ class Page(object):
             
         return content
         
+    @property
+    def parent(self):
+        return 'parent'
+        
+    @property
+    def children(self):
+        return ['eldest', 'middle', 'youngest']
+        
+    @property
+    def siblings(self):
+        return ['sister', 'brother']
+        
     def save(self, content):
         f = codecs.open(self.fp, 'w+', 'utf-8')
         f.write(content.strip())
         f.close
 
-        
-    def get_parent(self):
-        return None
-        
-    def get_children(self):
-        return None
-        
-    def get_siblings(self):
-        return None
