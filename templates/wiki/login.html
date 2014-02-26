@@ -4,23 +4,33 @@
 <h1 id="title">Login</h1>
 <div id="content">
 
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
+    {% if form.errors %}
+    <p style="color:red">Your username and password did not match. Please try again.</p>
+    {% endif %}
 
-<form method="post" action="{% url django.contrib.auth.views.login %}">
+    <form method="post" action="{% url django.contrib.auth.views.login %}">
 
-<dl>
-    <dt>{{ form.username.label_tag }}</dt>
-    <dd>{{ form.username }}</dd>
-    <dt>{{ form.password.label_tag }}</dt>
-    <dd>{{ form.password }}</dd>
-</dl>
-<p><input type="submit" value="Submit"></p>
+    <dl>
+        <dt>{{ form.username.label_tag }}</dt>
+        <dd>{{ form.username }}</dd>
+        <dt>{{ form.password.label_tag }}</dt>
+        <dd>{{ form.password }}</dd>
+    </dl>
+    <p>
+        <input type="submit" value="Submit">
+    </p>
 
-<input type="hidden" name="next" value="{{ next }}" />
-{% csrf_token %}
-</form>
+    <input type="hidden" name="next" value="{{ next }}" />
+    {% csrf_token %}
+    </form>
 
 </div>
+
+<div id="controls">
+    <h2>Page Controls</h2>
+    <ul id="control_list">
+        <li><a href="{{ next }}">Cancel</a></li>
+    </ul>
+</div>
+
 {% endblock %}
