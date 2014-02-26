@@ -14,5 +14,8 @@ urlpatterns = patterns('',
     url(r'^wiki/post/$', views.post, name='wiki_post'),
     url(r'^wiki/edit/$', views.edit, name='wiki_edit_new'),    
 
+    url(r'^wiki/login/$', 'django.contrib.auth.views.login', {'template_name': 'wiki/login.html'}, name='wiki_login'),
+    url(r'^wiki/logout/$', views.wiki_logout, name='wiki_logout'),
+    
     url(r'^wiki/.*/$', redirect_to, {'url': '/wiki/'}),
 )

@@ -3,6 +3,9 @@ from __future__ import unicode_literals
 
 import os
 
+from django.contrib.auth import authenticate
+from django.contrib.auth import logout as logout
+from django.contrib.auth.decorators import login_required
 # from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 
@@ -10,6 +13,14 @@ from config import pg_path
 from utils import render_to_response
 
 from models import *
+
+
+def wiki_logout(request):
+    logout(request)
+    if 'next' in request.GET:
+        return redirect(request.GET['next'])
+    else:
+        return redirect('wiki_root')
 
 
 def list_by_name(request):
@@ -35,7 +46,8 @@ def show(request, pg='_'):
     template = 'wiki/show.html'
     return render_to_response(request, template, context)
 
-    
+
+@login_required(login_url='/wiki/login/')    
 def edit(request, pg=''): 
 # blank will create a *new* page --- how to edit WikiRoot page?
     if not request.user.is_staff:
