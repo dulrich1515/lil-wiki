@@ -20,12 +20,6 @@
             e.preventDefault();
         }
         {% endif %}
-        if ( keycode == 27 ) // escape
-        {
-            e.preventDefault();
-            var elem = document.getElementById("control_list").style;
-            elem.display = ( elem.display != 'none' ) ? 'none' : 'block';
-        }
     });    
     </script>
 {% endblock %}

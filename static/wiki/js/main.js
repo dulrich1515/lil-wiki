@@ -28,3 +28,15 @@ function FindFocus()
     if ( bFound == true ) break;
   }
 }
+
+$(document).keydown(function(e) {
+    var keycode = e.which || e.keyCode;
+    var key = String.fromCharCode(keycode).toLowerCase()
+
+    if ( keycode == 27 ) // escape
+    {
+        e.preventDefault();
+        var elem = document.getElementById("control_list").style;
+        elem.display = ( elem.display != 'none' ) ? 'none' : 'block';
+    }
+});    
