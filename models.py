@@ -10,12 +10,20 @@ from config import pg_path
 
 class Page(object):
     def __init__(self, pg):
-        self.title = pg
         self.pg = pg
+        
+        if pg:
+            self.title = pg.split('/')[-1]
+        else:
+            self.title = 'WikiRoot'
 
         self.fp = os.path.join(pg_path, self.pg)
         if os.path.isdir(self.fp):
             self.fp = os.path.join(self.fp, '_')
+
+    @property
+    def exists(self):
+        return os.path.exists(self.fp)
             
     @property
     def raw_content(self):
@@ -51,7 +59,7 @@ class Page(object):
     
     @property
     def parent(self):
-        dirs = self.pg[:-1].split('/')[:-1]
+        dirs = self.pg.split('/')[:-1]
         return '/'.join(dirs)
         
     @property

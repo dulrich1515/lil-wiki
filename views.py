@@ -3,10 +3,10 @@ from __future__ import unicode_literals
 
 import os
 
-from django.contrib.auth import authenticate
 from django.contrib.auth import logout as logout
 from django.contrib.auth.decorators import login_required
 # from django.core.urlresolvers import reverse
+from django.http import Http404
 from django.shortcuts import redirect
 
 from config import pg_path
@@ -26,39 +26,46 @@ def wiki_logout(request):
 def list_by_name(request):
     pg_walk = next(os.walk(pg_path))
     
+    template = 'wiki/list_by_name.html'
     context = {
         'dirs': sorted(pg_walk[1]),
         'files': sorted(pg_walk[2]),
     }
-    template = 'wiki/list_by_name.html'
     return render_to_response(request, template, context)
 
 
 def show(request, pg=''):
     if not pg:
         return list_by_name(request)
-# do I really *need* a WikiRoot page?
+    if pg[:1] = '/':
+        return redirect('wiki_show', pg[:1])
+
+    # page = Page.objects.get(pg)
     page = Page(pg)
-        
+
+    if not page.exists:
+        template = 'wiki/404.html'
+    else:
+        template = 'wiki/show.html'
     context = {
         'page' : page,
     }
-    template = 'wiki/show.html'
     return render_to_response(request, template, context)
 
 
 @login_required(login_url='/wiki/login/')    
 def edit(request, pg=''): 
-# blank will create a *new* page --- how to edit WikiRoot page?
+# blank will create a *new* page, but how to edit WikiRoot page?
     if not request.user.is_staff:
         return redirect('wiki_root')
  
+    # page = Page.objects.get(pg)
     page = Page(pg)
 
+    template = 'wiki/edit.html'
     context = {
         'page' : page,
     }
-    template = 'wiki/edit.html'
     return render_to_response(request, template, context)
     
     
@@ -71,6 +78,7 @@ def post(request):
         content = request.POST['content']
         content = content.replace('\r\n','\n')
 
+        # page = Page.objects.get(title)
         page = Page(title)
 
         if 'cancel' in request.POST:
