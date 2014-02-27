@@ -28,7 +28,7 @@ $(document).keydown(function(e) {
     <h2>Related Pages</h2>
     <p>Up to&hellip;</p>
     <ul>
-        <li>{{ page.parent }}</li>
+        <li><a href="{% url wiki_show page.parent %}">{{ page.parent }}</a></li>
     </ul>
     <p>Down to&hellip;</p>
     <ul>

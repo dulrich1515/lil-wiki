@@ -10,8 +10,8 @@ from config import pg_path
 
 class Page(object):
     def __init__(self, pg):
-        self.pg = pg
         self.title = pg
+        self.pg = pg
 
         self.fp = os.path.join(pg_path, self.pg)
         if os.path.isdir(self.fp):
@@ -48,10 +48,11 @@ class Page(object):
             content = '.. default-role:: math\n\n' + content
             
         return content
-        
+    
     @property
     def parent(self):
-        return 'parent'
+        dirs = self.pg.split('/')[:-1]
+        return '/'.join(dirs)
         
     @property
     def children(self):
@@ -66,3 +67,4 @@ class Page(object):
         f.write(content.strip())
         f.close
 
+        

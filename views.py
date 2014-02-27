@@ -34,7 +34,7 @@ def list_by_name(request):
     return render_to_response(request, template, context)
 
 
-def show(request, pg='_'):
+def show(request, pg=''):
 # do I really *need* a WikiRoot page?
     page = Page(pg)
     if pg == '_' and not page.content:
