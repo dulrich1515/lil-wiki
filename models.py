@@ -51,7 +51,7 @@ class Page(object):
     
     @property
     def parent(self):
-        dirs = self.pg.split('/')[:-1]
+        dirs = self.pg[:-1].split('/')[:-1]
         return '/'.join(dirs)
         
     @property

@@ -35,10 +35,10 @@ def list_by_name(request):
 
 
 def show(request, pg=''):
+    if not pg:
+        return list_by_name(request)
 # do I really *need* a WikiRoot page?
     page = Page(pg)
-    if pg == '_' and not page.content:
-        return list_by_name(request)
         
     context = {
         'page' : page,
