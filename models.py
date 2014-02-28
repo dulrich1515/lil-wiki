@@ -17,7 +17,6 @@ class Page(object):
         else:
             self.title = 'WikiRoot'
 
-
     @property
     def exists(self):
         return os.path.exists(self.fp)
@@ -94,24 +93,29 @@ class Page(object):
 
     def save(self, content):
         fp = self.fp
-        if not os.path.isfile(self.fp):
-            if os.path.isdir(self.fp):
+        if not os.path.isfile(self.fp): # then will have to do something unusual
+            if os.path.isdir(self.fp): # then save the content in a special file
                 fp = fp + '/_'
-            else:
+            else: # the page doesn't exist --- before we build it, we need to 
+                  # make sure the directory structure is compatible
                 dirs = self.pg.split('/')
                 fp = pg_path
-                for d in dirs:
+                for d in dirs[:-1]: # these directories should all exist
                     fp = os.path.join(fp, d)
-                    if not os.path.isdir(fp):
-                        if os.path.isfile(fp):
-                            os.rename(fp, fp + '/_')
-                            os.mkdir(fp)
-                            os.rename(fp + '/_', os.path.join(fp, '/_'))
-                        else:
-                            os.mkdir(fp)
+                    if os.path.isfile(fp): # then we need to prepare to push this content into a new directory
+                        os.rename(fp, fp + '__')
+                    if not os.path.isdir(fp): # then we need to create it
+                        os.mkdir(fp)
+                    if os.path.isfile(fp + '__'): # then pull this special content into the new directory
+                        os.rename(fp + '__', fp + '/_')
+                fp = self.fp # reset in order to prepare to save the content
+                
         f = codecs.open(fp, 'w+', 'utf-8')
         f.write(content.strip())
         f.close
+        
+    def delete(self):
+        pass
 
     def __unicode__(self):
         return self.pg

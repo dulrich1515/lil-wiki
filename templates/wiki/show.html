@@ -9,7 +9,7 @@ $(document).keydown(function(e) {
     {% if user.is_staff %}
     if (key == 'e' && e.ctrlKey)
     {
-        location.href='{% url wiki_edit page.title %}';
+        location.href='{% url wiki_edit page %}';
         e.preventDefault();
     }
     {% endif %}
@@ -17,7 +17,7 @@ $(document).keydown(function(e) {
 {% endblock %}
 
 {% block main-content %}
-<div{% if user.is_staff %} ondblclick="location.href='{% url wiki_edit page.title %}';"{% endif %}>
+<div{% if user.is_staff %} ondblclick="location.href='{% url wiki_edit page %}';"{% endif %}>
     <h1 id="title">{{ page.title }}</h1>
     <div id="content">
     {{ page.content|rst2html }}
@@ -74,13 +74,13 @@ $(document).keydown(function(e) {
     <h2>Page Controls</h2>
     <ul id="control_list">
         {% if user.is_staff %}
-        <li><a href="{% url wiki_logout %}?next={% url wiki_show page.pg %}">Logout</a></li>
+        <li><a href="{% url wiki_logout %}?next={% url wiki_show page %}">Logout</a></li>
         {% else %}
-        <li><a href="{% url wiki_login %}?next={% url wiki_show page.pg %}">Login</a></li>
+        <li><a href="{% url wiki_login %}?next={% url wiki_show page %}">Login</a></li>
         {% endif %}
         <li><a href="{% url wiki_root %}">WikiRoot</a></li>
         {% if user.is_staff %}
-        <li><a href="{% url wiki_edit page.title %}">Edit Page</a></li>
+        <li><a href="{% url wiki_edit page %}">Edit Page</a></li>
         {% endif %}
     </ul>
 </div>

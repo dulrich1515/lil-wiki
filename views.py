@@ -81,9 +81,26 @@ def post(request):
             return redirect('wiki_show', old_pg)
 
         elif 'delete' in request.POST:
-            if os.path.isfile(page.fp): # delete only files for now...
+            if os.path.isfile(page.fp): # error check --- it should exist (create before you annhilate)
                 os.remove(page.fp)
-            return redirect('wiki_root')
+                
+            while page.parent: # check if the directory is now empty --- if so, demote the directory
+                path, dirs, files = next(os.walk(page.parent.fp))
+                if dirs: # don't delete if there are subdirectories
+                    break
+                else: # there are no subdirectories
+                    if files and files != ['_']: # don't delete if there are other files
+                        break
+                    else: # the directory is effectively empty
+                        fp = page.parent.fp
+                        if files == ['_']: # capture this special content if it is there
+                            os.rename(fp + '/_', fp + '__')
+                        os.rmdir(fp) # delete the directory
+                        if os.path.isfile(fp + '__'): # remove the special content tag
+                            os.rename(fp + '__', fp)
+                page = page.parent
+                            
+            return redirect('wiki_show', page)
 
         elif 'update' in request.POST or 'submit' in request.POST:
             page.save(content)
