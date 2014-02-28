@@ -1,16 +1,16 @@
 ﻿{% extends "wiki/base.html" %}
 
 {% block main-content %}
-<h1 id="title">Pages by Name</h1>
+<h1 id="title">WikiRoot</h1>
 <div id="content">
     <ul>
-        {% for dir in dirs %}
-        <li>» <a href="{% url wiki_show dir %}">{{ dir }}</a></li>
+        {% for page in root.children.dirs %}
+        <li>» <a href="{% url wiki_show page %}">{{ page }}</a></li>
         {% endfor %}
     </ul>
     <ul>
-        {% for pg in files %}
-        <li><a href="{% url wiki_show pg %}">{{ pg }}</a></li>
+        {% for page in root.children.files %}
+        <li><a href="{% url wiki_show page %}">{{ page }}</a></li>
         {% endfor %}
     </ul>
 </div>

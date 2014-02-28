@@ -1,4 +1,4 @@
-{% extends "wiki/base.html" %}
+﻿{% extends "wiki/base.html" %}
 {% load rst_tags %}
 
 {% block extra-script %}
@@ -24,28 +24,39 @@ $(document).keydown(function(e) {
     </div>
 </div>
 
+{% if page.parent or page.children or page.siblings %}
 <div id="related-pages">
     <h2>Related Pages</h2>
+    {% if page.parent %}
     <p>Up to&hellip;</p>
     <ul>
-        <li><a href="{% url wiki_show page.parent %}">{{ page.parent }}</a></li>
+        <li><a href="{% url wiki_show page.parent.pg %}">{{ page.parent.title }}</a></li>
     </ul>
+    {% endif %}
+    {% if page.children %}
     <p>Down to&hellip;</p>
     <ul>
-        {% for child in page.children.dirs %}
-        <li>{{ child }}</li>
+        {% for page in page.children.dirs %}
+        <li>» <a href="{% url wiki_show page.pg %}">{{ page.title }}</a></li>
         {% endfor %}
-        {% for child in page.children.files %}
-        <li>{{ child }}</li>
+        {% for page in page.children.files %}
+        <li><a href="{% url wiki_show page.pg %}">{{ page.title }}</a></li>
         {% endfor %}
     </ul>
+    {% endif %}
+    {% if page.siblings %}
     <p>Sideways&hellip;</p>
     <ul>
-        {% for sibling in page.siblings %}
-        <li>{{ sibling }}</li>
+        {% for page in page.siblings.dirs %}
+        <li>» <a href="{% url wiki_show page.pg %}">{{ page.title }}</a></li>
+        {% endfor %}
+        {% for page in page.siblings.files %}
+        <li><a href="{% url wiki_show page.pg %}">{{ page.title }}</a></li>
         {% endfor %}
     </ul>
+    {% endif %}
 </div>
+{% endif %}
 
 <div id="controls">
     <h2>Page Controls</h2>
