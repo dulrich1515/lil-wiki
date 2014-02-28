@@ -56,27 +56,23 @@ class Page(object):
         dirs = self.pg.split('/')[:-1]
         return Page('/'.join(dirs))
 
-    def get_subpages(self, page):
+    def get_subpages(self, page, remove=[]):
         subpages = {'dirs': [], 'files': []}
         if os.path.isdir(page.fp):
             for path, dirs, files in os.walk(page.fp):
                 if '_' in files:
                     files.remove('_')
-                for d in sorted(dirs):
-                    pg = d
+                for pg in sorted(dirs):
                     if page.pg:
                         pg = page.pg + '/' + pg
                     subpages['dirs'].append(Page(pg))
-                for f in sorted(files):
-                    pg = f
+                for pg in sorted(files):
                     if page.pg:
                         pg = page.pg + '/' + pg
                     subpages['files'].append(Page(pg))
                 break
-        if not subpages['dirs']:
-            del subpages['dirs']
-        if not subpages['files']:
-            del subpages['files']
+        if not subpages['dirs'] and not subpages['files']:
+            subpages = {}
         return subpages
 
     @property
@@ -85,15 +81,15 @@ class Page(object):
 
     @property
     def siblings(self):
-        siblings = self.get_subpages(self.parent)
-        for page in siblings['dirs']:
-            if page.pg == self.pg:
-                siblings['dirs'].remove(page)
-                break
-        for page in siblings['files']:
-            if page.pg == self.pg:
-                siblings['files'].remove(page)
-                break
+        siblings = self.get_subpages(self.parent, remove=[self])
+        # for page in siblings['dirs']:
+            # if page.pg == self.pg:
+                # siblings['dirs'].remove(page)
+                # break
+        # for page in siblings['files']:
+            # if page.pg == self.pg:
+                # siblings['files'].remove(page)
+                # break
         return siblings
 
     def save(self, content):
