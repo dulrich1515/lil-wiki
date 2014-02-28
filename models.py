@@ -11,7 +11,7 @@ from config import pg_path
 class Page(object):
     def __init__(self, pg):
         self.pg = pg
-        
+
         if pg:
             self.title = pg.split('/')[-1]
         else:
@@ -24,7 +24,7 @@ class Page(object):
     @property
     def exists(self):
         return os.path.exists(self.fp)
-            
+
     @property
     def raw_content(self):
         raw_content = ''
@@ -33,10 +33,10 @@ class Page(object):
             raw_content = f.read()
             f.close()
         return raw_content
-    
-            
+
+
     @property
-    def content(self, toc=False):    
+    def content(self, toc=False):
         content = self.raw_content
 
         # Allows renaming of auto-links to wiki pages
@@ -48,31 +48,35 @@ class Page(object):
         pattern = r'<<([\w\/]+)>>'
         repl = r'`\1 <{}\1/>`_'.format(reverse('wiki_root'))
         content = re.sub(pattern, repl, content)
-    
+
         if content:
             if toc:
                 content = '.. contents:: Table of contents\n\n' + content
-                
+
             content = '.. default-role:: math\n\n' + content
-            
+
         return content
-    
+
     @property
     def parent(self):
         dirs = self.pg.split('/')[:-1]
         return '/'.join(dirs)
-        
+
     @property
     def children(self):
-        return ['eldest', 'middle', 'youngest']
-        
+        pg_walk = next(os.walk(self.fp))
+        children = {
+            'dirs': sorted(pg_walk[1]),
+            'files': sorted(pg_walk[2]),
+        }
+        return children
+
     @property
     def siblings(self):
         return ['sister', 'brother']
-        
+
     def save(self, content):
         f = codecs.open(self.fp, 'w+', 'utf-8')
         f.write(content.strip())
         f.close
 
-        

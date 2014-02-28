@@ -13,7 +13,7 @@ $(document).keydown(function(e) {
         e.preventDefault();
     }
     {% endif %}
-});    
+});
 {% endblock %}
 
 {% block main-content %}
@@ -23,7 +23,7 @@ $(document).keydown(function(e) {
     {{ page.content|rst2html }}
     </div>
 </div>
-    
+
 <div id="related-pages">
     <h2>Related Pages</h2>
     <p>Up to&hellip;</p>
@@ -32,7 +32,10 @@ $(document).keydown(function(e) {
     </ul>
     <p>Down to&hellip;</p>
     <ul>
-        {% for child in page.children %}
+        {% for child in page.children.dirs %}
+        <li>{{ child }}</li>
+        {% endfor %}
+        {% for child in page.children.files %}
         <li>{{ child }}</li>
         {% endfor %}
     </ul>
