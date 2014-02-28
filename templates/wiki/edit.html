@@ -2,7 +2,7 @@
 
 {% block html-head %}
     <link rel="stylesheet" href="{{ STATIC_URL }}wiki/css/editor.css">
-    
+
     <script src="{{ STATIC_URL }}wiki/js/jquery-1.8.3.min.js"></script>
     <script src="{{ STATIC_URL }}wiki/js/main.js"></script>
     <script src="{{ STATIC_URL }}wiki/js/editor.js"></script>
@@ -11,7 +11,7 @@
 {% block main-content %}
 <form id="editor" method="post" action="{% url wiki_post %}">
     <p><textarea class="editarea" id="content" name="content">{{ page.raw_content }}</textarea></p>
-    <p><input type="text" class="editarea" id="title" name="title" value="{{ page.title }}"></p>
+    <p><input type="text" class="editarea" id="title" name="new_pg" value="{{ page.pg }}"></p>
 
     <div id="controls">
         <h2>Page Controls</h2>
@@ -23,7 +23,7 @@
         </ul>
     </div>
 
-    <input type="hidden" name="pg" value="{{ page.title }}">
+    <input type="hidden" name="old_pg" value="{{ page.pg }}">
     {% csrf_token %}
 </form>
 {% endblock %}

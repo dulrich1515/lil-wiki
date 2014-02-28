@@ -68,18 +68,17 @@ def edit(request, pg=''):
 
 def post(request):
     if request.user.is_staff and request.method == 'POST':
-        pg = request.POST['pg']
-        title = request.POST['title']
-        title = re.sub('[\/]+$', '', title) # cut any trailing slashes off...
-        title = re.sub('[^\w^\/]+', '', title) # poor man's validation attempt
+        old_pg = request.POST['old_pg']
+        new_pg = request.POST['new_pg']
+        new_pg = re.sub('[\/]+$', '', new_pg) # cut any trailing slashes off...
+        new_pg = re.sub('[^\w^\/]+', '', new_pg) # poor man's validation attempt
         content = request.POST['content']
         content = content.replace('\r\n','\n')
 
-        # page = Page.objects.get(title)
-        page = Page(title)
+        page = Page(new_pg)
 
         if 'cancel' in request.POST:
-            return redirect('wiki_show', pg)
+            return redirect('wiki_show', old_pg)
 
         elif 'delete' in request.POST:
             if os.path.isfile(page.fp): # delete only files for now...
@@ -87,36 +86,18 @@ def post(request):
             return redirect('wiki_root')
 
         elif 'update' in request.POST or 'submit' in request.POST:
-            if '/' in title:
-                check_path(title)
-            page.save(content) # shouldn't check_path be in page.save?
+            page.save(content)
 
-            if title.lower() != pg.lower(): # case-sensitivity issue here?
-            # then title was changed ... need to delete old file
-                fp = os.path.join(pg_path, pg)
+            if new_pg.lower() != old_pg.lower(): # case-sensitivity issue here?
+            # then pg was changed ... need to delete old file
+                fp = os.path.join(pg_path, old_pg)
                 if os.path.isfile(fp):
                     os.remove(fp)
 
             if 'update' in request.POST:
-                return redirect('wiki_edit', title)
+                return redirect('wiki_edit', new_pg)
             else:
-                return redirect('wiki_show', title)
+                return redirect('wiki_show', new_pg)
 
     # nothing should get here...
     return redirect('wiki_root')
-
-
-def check_path(title):
-    dirs = title.split('/')[:-1]
-    if not os.path.isdir(os.path.join(pg_path, *dirs)):
-        dir = pg_path
-        for d in dirs:
-            dir = os.path.join(dir, d)
-            if not os.path.isdir(dir):
-                if os.path.isfile(dir):
-                    os.rename(dir, dir + '_')
-                    os.mkdir(dir)
-                    os.rename(dir + '_', os.path.join(dir, '_'))
-                else:
-                    os.mkdir(dir)
-
