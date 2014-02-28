@@ -2,24 +2,24 @@
 /*** General Tags ***/
 /********************/
 
-body { 
+body {
     font-family:serif;
     margin:1em;
     background:#e6eefe;
-    background:white url(../img/back.png) repeat-x;
+    /* background:white url(../img/back.png) repeat-x; */
     max-width:100%;
 }
-a { 
-    color:blue; 
-    text-decoration:none; 
-}    
-a:hover { 
+a {
+    color:blue;
+    text-decoration:none;
+}
+a:hover {
     text-decoration:underline;
 }
-h2 { 
+h2 {
     margin:0 -0.75em;
     padding:0.70em;
-    background:#e6eefe; 
+    background:#e6eefe;
 }
 h3 {
 }
@@ -35,8 +35,8 @@ hr {
     background:white url(../img/squig.png) no-repeat;
     height:10px;
 }
-acronym { 
-    border-bottom:1px dotted #f00; 
+acronym {
+    border-bottom:1px dotted #f00;
 }
 blockquote, pre, .sidebar {
     padding:0.5em 0.8em;
@@ -69,22 +69,22 @@ pre {
 /*** Containers ***/
 /******************/
 
-#title { 
+#title {
     overflow-x:scroll;
     margin:1.2em 0 0.3em 0;
-    }#title::-webkit-scrollbar { 
-    display: none; 
-}    
+    }#title::-webkit-scrollbar {
+    display: none;
+}
 
-#content { 
+#content {
     overflow-x:hidden;
     position:relative;
     padding:0 1em;
     margin:1em 0;
-    border:1px solid white; 
+    border:1px solid white;
     background:#fff;
 }
-#controls { 
+#controls {
     padding:0.5em;
     position:fixed;
     top:0;
@@ -101,22 +101,22 @@ pre {
 #controls ul {
     padding:0;
     margin:0;
-    list-style:none; 
+    list-style:none;
 }
 #controls:hover ul {
     display:block !important;
 }
-#controls li { 
+#controls li {
     padding:0;
     margin:0;
-} 
-#controls a { 
+}
+#controls a {
     padding:0 1em;
     margin:0;
-    border:1px solid transparent; 
+    border:1px solid transparent;
     display:block;
 }
-#controls a:hover { 
+#controls a:hover {
     border-left:1px solid #fff;
     border-top:1px solid #fff;
     border-right:1px solid #aaa;

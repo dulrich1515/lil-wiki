@@ -27,32 +27,44 @@ $(document).keydown(function(e) {
 {% if page.parent or page.children or page.siblings %}
 <div id="related-pages">
     <h2>Related Pages</h2>
-    {% if page.parent %}
-    <p>Up to&hellip;</p>
-    <ul>
-        <li><a href="{% url wiki_show page.parent.pg %}">{{ page.parent.title }}</a></li>
-    </ul>
-    {% endif %}
     {% if page.children %}
     <p>Down to&hellip;</p>
+    {% if page.children.dirs %}
     <ul>
         {% for page in page.children.dirs %}
-        <li>» <a href="{% url wiki_show page.pg %}">{{ page.title }}</a></li>
-        {% endfor %}
-        {% for page in page.children.files %}
-        <li><a href="{% url wiki_show page.pg %}">{{ page.title }}</a></li>
+        <li>» <a href="{% url wiki_show page %}">{{ page.title }}</a></li>
         {% endfor %}
     </ul>
+    {% endif %}
+    {% if page.children.files %}
+    <ul>
+        {% for page in page.children.files %}
+        <li><a href="{% url wiki_show page %}">{{ page.title }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
     {% endif %}
     {% if page.siblings %}
     <p>Sideways&hellip;</p>
+    {% if page.siblings.files %}
     <ul>
         {% for page in page.siblings.dirs %}
-        <li>» <a href="{% url wiki_show page.pg %}">{{ page.title }}</a></li>
+        <li>» <a href="{% url wiki_show page %}">{{ page.title }}</a></li>
         {% endfor %}
+    </ul>
+    {% endif %}
+    {% if page.siblings.files %}
+    <ul>
         {% for page in page.siblings.files %}
-        <li><a href="{% url wiki_show page.pg %}">{{ page.title }}</a></li>
+        <li><a href="{% url wiki_show page %}">{{ page.title }}</a></li>
         {% endfor %}
+    </ul>
+    {% endif %}
+    {% endif %}
+    {% if page.parent %}
+    <p>Up to&hellip;</p>
+    <ul>
+        <li><a href="{% url wiki_show page.parent %}">{{ page.parent.title }}</a></li>
     </ul>
     {% endif %}
 </div>

@@ -70,33 +70,42 @@ class Page(object):
                 'files' : [],
             }
             for path, dirs, files in os.walk(page.fp):
-                for d in dirs:
+                for d in sorted(dirs):
                     pg = d
-                    if self.pg:
-                        pg = self.pg + '/' + pg
+                    if page.pg:
+                        pg = page.pg + '/' + pg
                     subpages['dirs'].append(Page(pg))
-                for f in files:
+                for f in sorted(files):
                     if f != '_':
                         pg = f
-                        if self.pg:
-                            pg = self.pg + '/' + pg
+                        if page.pg:
+                            pg = page.pg + '/' + pg
                         subpages['files'].append(Page(pg))
                 break
         return subpages
-        
+
     @property
     def children(self):
         return self.get_subpages(self)
 
     @property
     def siblings(self):
-        return self.get_subpages(self.parent)
+        siblings = self.get_subpages(self.parent)
+        for page in siblings['dirs']:
+            if page.pg == self.pg:
+                siblings['dirs'].remove(page)
+                break
+        for page in siblings['files']:
+            if page.pg == self.pg:
+                siblings['files'].remove(page)
+                break
+        return siblings
 
     def save(self, content):
         f = codecs.open(self.fp, 'w+', 'utf-8')
         f.write(content.strip())
         f.close
-        
+
     def __unicode__(self):
         return self.pg
 
