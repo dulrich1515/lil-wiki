@@ -4,9 +4,12 @@ from __future__ import unicode_literals
 from docutils import nodes
 from docutils.parsers import rst
 
+from restructuredtext_tags import rst2html
+
 ## -------------------------------------------------------------------------- ##
 
 def sci_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
+
     """
     ----------------------
     Docutils role: ``sci``
@@ -52,6 +55,7 @@ def sci_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
 ## -------------------------------------------------------------------------- ##
     
 def atm_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
+
     """
     ----------------------
     Docutils role: ``atm``
@@ -349,68 +353,84 @@ class tbl_directive(rst.Directive):
     def run(self):
 
         self.assert_has_content()
-        node_list = []
+        try:
+            parser = rst.tableparser.GridTableParser()
+            tbl = parser.parse(self.content)
+        except:
+            try:
+                parser = rst.tableparser.SimpleTableParser()
+                tbl = parser.parse(self.content)
+            except:
+                tbl = None
 
-# HTML writer specifics start...
+        text = ''
+        if tbl:
+            # parser.parse() returns a list of three items
+            #
+            # 1. A list of column widths
+            # 2. A list of head rows
+            # 3. A list of body rows
 
-        tbltext = '\n'
+            colspecs = tbl[0]
+            headrows = tbl[1] # tbl[1][i] is the ith column head
+            bodyrows = tbl[2]
 
-        # if 'label' in self.options.keys():
-            # label = nodes.make_id(self.options['label'])
-            # tbltext += '<div id="tbl:{0}" class="my-docutils tbl {1}">\n'.format(label, position)
-        # else:
-            # tbltext += '<div class="my-docutils tbl {0}">\n'.format(position)
+            # Each row contains a list of cells
+            #
+            # Each cell is either
+            #
+            # - None (for a cell unused because of another cell's span), or
+            # - A tuple with four items:
+            #
+            #   1. The number of extra rows used by the cell in a vertical span
+            #   2. The number of extra columns used by the cell in a horizontal span
+            #   3. The line offset of the first line of the cell contents
+            #   4. The cell contents --- a list of lines of text
 
-        # tbltext += '<table>\n'
+            divid = ''
+            if 'label' in self.options.keys():
+                label = nodes.make_id(self.options['label'])
+                divid = ' id="tbl:{0}"'.format(label)
 
-        # if 'cols' in self.options.keys():
-            # tblspec = self.options['cols']
-        # else:
-            # tblspec = ncols * 'c'
+            caption = ''
+            if self.arguments: # use as caption
+                caption = rst2html(self.arguments[0], inline=True)
 
-        # col_align = []
-        # for x in tblspec:
-            # if x == 'l':
-                # col_align += ['left']
-            # elif x == 'c':
-                # col_align += ['center']
-            # elif x == 'r':
-                # col_align += ['right']
-
-        # tbltext += '<tr>\n'
-        # if tbl[1]:
-            # head = ncols * ['']
-
-            # # Truly, the following is overkill---it won't be used.
-            # # It's too difficult to deal with long table text in LaTeX.
-            # for rowdata in tbl[1]:
-                # for i in range(ncols):
-                    # cell = rst2html(''.join(rowdata[i][3]))[3:-4]
-                    # head[i] = ' '.join([head[i], cell]).strip()
-
-            # for i in range(ncols):
-                # head[i] = u'<th>%s</th>\n' % head[i]
-            # tbltext += ''.join(head)
-            # tbltext += '<tr>\n'
-        # if tbl[2]:
-            # for rowdata in tbl[2]:
-                # body = ncols * ['']
-                # for i in range(ncols):
-                    # cell = rst2html(''.join(rowdata[i][3]))[3:-4]
-                    # body[i] = u'<td style="text-align:{1}">{0}</td>\n'.format(cell, col_align[i])
-                # tbltext += ''.join(body)
-                # tbltext += '</tr>\n'
-
-        # if self.arguments: # caption
-            # tbltext += '<caption>%s</caption>' % rst2html(self.arguments[0])
-
-        # tbltext += '</table>\n'
-        # tbltext += '</div>\n'
-
-        text = tbltext
+            colspec = len(tbl[0]) * 'c'
+            if 'cols' in self.options.keys():
+                colspec = self.options['cols']
+            align = {'l': 'left', 'c': 'center', 'r': 'right'}
+                
+            text = ''
+            text += '<div{} class="my-docutils tbl">\n'.format(divid)
+            text += '<table>\n'
+            
+            for tag, rows in [('th', tbl[1]), ('td', tbl[2])]:
+                for row in rows:
+                    text += '<tr>\n'
+                    for cell in row:
+                        if cell:
+                            rowspan = ''
+                            if cell[0]:
+                                rowspan = ' rowspan="{}"'.format(cell[0] + 1)
+                            colspan = ''
+                            if cell[1]:
+                                colspan = ' colspan="{}"'.format(cell[1] + 1)
+                            cellalign = align[colspec[row.index(cell)]]
+                            celltext = rst2html('\n'.join(cell[3]), inline=True)
+                            
+                            text += '<{}{}{} style="text-align:{}">\n'.format(
+                                tag, rowspan, colspan, cellalign)
+                            text += '{}\n'.format(celltext)
+                            text += '</{}>\n'.format(tag)
+                    text += '</tr>\n'
+                
+            text += '<caption>{}</caption>\n'.format(caption)
+            text += '</table>\n'
+            text += '</div>\n'
 
         node = nodes.raw(text=text, format='html', **self.options)
-        node_list += [node]
+        node_list = [node]
 
         return node_list
 ## -------------------------------------------------------------------------- ##
