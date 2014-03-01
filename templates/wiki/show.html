@@ -1,5 +1,5 @@
 ﻿{% extends "wiki/base.html" %}
-{% load rst_tags %}
+{% load restructuredtext_tags %}
 
 {% block extra-script %}
 $(document).keydown(function(e) {
@@ -13,6 +13,11 @@ $(document).keydown(function(e) {
         e.preventDefault();
     }
     {% endif %}
+    if (key == 'p' && e.ctrlKey)
+    {
+        window.print()
+        e.preventDefault();
+    }
 });
 {% endblock %}
 

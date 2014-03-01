@@ -47,7 +47,6 @@ class Page(object):
         if content:
             if toc:
                 content = '.. contents:: Table of contents\n\n' + content
-            content = '.. default-role:: math\n\n' + content
         return content
 
     @property
