@@ -44,9 +44,10 @@ $(document).keydown(function(e) {
     </ul>
     {% endif %}
     {% endif %}
+
     {% if page.siblings %}
     <p>Sideways&hellip;</p>
-    {% if page.siblings.files %}
+    {% if page.siblings.dirs %}
     <ul>
         {% for page in page.siblings.dirs %}
         <li>» <a href="{% url wiki_show page %}">{{ page.title }}</a></li>
@@ -61,6 +62,7 @@ $(document).keydown(function(e) {
     </ul>
     {% endif %}
     {% endif %}
+
     {% if page.parent %}
     <p>Up to&hellip;</p>
     <ul>

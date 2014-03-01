@@ -11,7 +11,7 @@ from config import pg_path
 class Page(object):
     def __init__(self, pg):
         self.pg = pg
-        self.fp = os.path.join(pg_path, self.pg)
+        self.fp = os.path.abspath(os.path.join(pg_path, self.pg))
         if pg:
             self.title = pg.split('/')[-1]
         else:
@@ -38,11 +38,11 @@ class Page(object):
         content = self.raw_content
         # Allows renaming of auto-links to wiki pages
         pattern = r'`(.+) <<([\w\/]+)>>`_'
-        repl = r'`\1 <{}\2/>`_'.format(reverse('wiki_root'))
+        repl = r'`\1 <{}/show/\2/>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
         content = re.sub(pattern, repl, content)
         # Auto-link to wiki pages (must happen last)
         pattern = r'<<([\w\/]+)>>'
-        repl = r'`\1 <{}\1/>`_'.format(reverse('wiki_root'))
+        repl = r'`\1 <{}/show/\1/>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
         content = re.sub(pattern, repl, content)
         if content:
             if toc:
@@ -53,10 +53,12 @@ class Page(object):
     @property
     def parent(self):
         dirs = self.pg.split('/')[:-1]
-        return Page('/'.join(dirs))
+        parent = Page('/'.join(dirs))
+        return parent
 
     def get_subpages(self, page, remove=[]):
         subpages = {'dirs': [], 'files': []}
+
         if os.path.isdir(page.fp):
             for path, dirs, files in os.walk(page.fp):
                 if '_' in files:
@@ -70,8 +72,22 @@ class Page(object):
                         pg = page.pg + '/' + pg
                     subpages['files'].append(Page(pg))
                 break
+        
+        for pg in [x.pg for x in remove]:
+            for page in subpages['dirs']:
+                if page.pg == pg:
+                    subpages['dirs'].remove(page)
+                    break
+            for page in subpages['files']:
+                if page.pg == pg:
+                    subpages['files'].remove(page)
+                    break
+
+            print subpages['dirs']
+            
         if not subpages['dirs'] and not subpages['files']:
             subpages = {}
+            
         return subpages
 
     @property
@@ -81,14 +97,6 @@ class Page(object):
     @property
     def siblings(self):
         siblings = self.get_subpages(self.parent, remove=[self])
-        # for page in siblings['dirs']:
-            # if page.pg == self.pg:
-                # siblings['dirs'].remove(page)
-                # break
-        # for page in siblings['files']:
-            # if page.pg == self.pg:
-                # siblings['files'].remove(page)
-                # break
         return siblings
 
     def save(self, content):
