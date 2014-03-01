@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from docutils import nodes
+from docutils.parsers import rst
 
 ## -------------------------------------------------------------------------- ##
 
@@ -222,3 +223,263 @@ def atm_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
     ]
 
     return node_list, []
+
+## -------------------------------------------------------------------------- ##
+
+def ref_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
+
+    """
+    ----------------------
+    Docutils role: ``ref``
+    ----------------------
+
+    Inserts a hyperlink reference to a figure or table with a custom label.
+
+    Example
+    -------
+
+    ::
+
+        :ref:`image-filename.png`
+
+    This will hyperlink to::
+
+        .. fig:: Some image here
+            :image: image-filename.png
+            :scale: 0.75
+
+    or
+
+    ::
+
+        :fig:`trapezoid`
+
+    This will hyperlink to::
+
+        .. fig:: Sample Trapezoid
+            :position: side
+            :label: trapezoid
+
+            \begin{tikzpicture}
+            \draw [fill=black!10] (-1,0.7) -- (1,0.7)
+            -- (0.7,-0.7) -- (-0.7,-0.7) -- cycle;
+            \end{tikzpicture}
+
+    Notes
+    -----
+
+    * Works only for ``latex`` writer
+    * Partial support for ``html`` writer
+    """
+
+    ref = nodes.make_id(text)
+    if role in ['fig', 'tbl']:
+        ref = role + ':' + ref
+
+    t = dict()
+
+    t['latex'] = r'\hyperref[%s]{\ref*{%s}}' % (ref, ref)
+    t['html']  = r'<a href="#%s">[link]</a>' % (ref,)
+
+    node_list = [
+        nodes.raw(text=t['latex'], format='latex'),
+        nodes.raw(text=t['html'], format='html')
+    ]
+
+    return node_list, []
+
+## -------------------------------------------------------------------------- ##
+
+def jargon_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
+
+    """
+    -------------------------
+    Docutils role: ``jargon``
+    -------------------------
+
+    Creates an index entry then bolds the term in the main text.
+
+    Example
+    -------
+
+   ::
+
+        We use a :jargon:`vector` to capture both direction and magnitude.
+        An important tool in QED is the :jargon:`Feynman diagram`.
+        :jargon:`~Energy` is the ability to do work.
+
+    Notes
+    -----
+
+    * Force a conversion to lower case in the index with a tilde ``~``.  Useful
+      when the term starts a sentence.
+    * Works only for ``latex`` and ``html`` writers ...
+    """
+
+    t = dict()
+
+    if text[0] == '~':
+        text = text[1:]
+        t['latex'] = r'\textbf{%s}\index{%s}' % (text,text.lower())
+        t['html'] = '<strong>%s</strong>' % text
+    else:
+        t['latex'] = r'\textbf{%s}\index{%s}' % (text,text)
+        t['html'] = '<strong>%s</strong>' % text
+
+    node_list = [
+        nodes.raw(text=t['latex'], format='latex'),
+        nodes.raw(text=t['html'], format='html')
+    ]
+
+    return node_list, []
+
+## -------------------------------------------------------------------------- ##
+
+class tbl_directive(rst.Directive):
+
+    required_arguments = 0
+    optional_arguments = 1
+    final_argument_whitespace = True
+    option_spec = {
+        'label'     : rst.directives.unchanged,
+        'cols'      : rst.directives.unchanged,
+    }
+    has_content = True
+
+    def run(self):
+
+        self.assert_has_content()
+        node_list = []
+
+# HTML writer specifics start...
+
+        tbltext = '\n'
+
+        # if 'label' in self.options.keys():
+            # label = nodes.make_id(self.options['label'])
+            # tbltext += '<div id="tbl:{0}" class="my-docutils tbl {1}">\n'.format(label, position)
+        # else:
+            # tbltext += '<div class="my-docutils tbl {0}">\n'.format(position)
+
+        # tbltext += '<table>\n'
+
+        # if 'cols' in self.options.keys():
+            # tblspec = self.options['cols']
+        # else:
+            # tblspec = ncols * 'c'
+
+        # col_align = []
+        # for x in tblspec:
+            # if x == 'l':
+                # col_align += ['left']
+            # elif x == 'c':
+                # col_align += ['center']
+            # elif x == 'r':
+                # col_align += ['right']
+
+        # tbltext += '<tr>\n'
+        # if tbl[1]:
+            # head = ncols * ['']
+
+            # # Truly, the following is overkill---it won't be used.
+            # # It's too difficult to deal with long table text in LaTeX.
+            # for rowdata in tbl[1]:
+                # for i in range(ncols):
+                    # cell = rst2html(''.join(rowdata[i][3]))[3:-4]
+                    # head[i] = ' '.join([head[i], cell]).strip()
+
+            # for i in range(ncols):
+                # head[i] = u'<th>%s</th>\n' % head[i]
+            # tbltext += ''.join(head)
+            # tbltext += '<tr>\n'
+        # if tbl[2]:
+            # for rowdata in tbl[2]:
+                # body = ncols * ['']
+                # for i in range(ncols):
+                    # cell = rst2html(''.join(rowdata[i][3]))[3:-4]
+                    # body[i] = u'<td style="text-align:{1}">{0}</td>\n'.format(cell, col_align[i])
+                # tbltext += ''.join(body)
+                # tbltext += '</tr>\n'
+
+        # if self.arguments: # caption
+            # tbltext += '<caption>%s</caption>' % rst2html(self.arguments[0])
+
+        # tbltext += '</table>\n'
+        # tbltext += '</div>\n'
+
+        text = tbltext
+
+        node = nodes.raw(text=text, format='html', **self.options)
+        node_list += [node]
+
+        return node_list
+## -------------------------------------------------------------------------- ##
+
+class fig_directive(rst.Directive):
+
+    required_arguments = 0
+    optional_arguments = 1
+    final_argument_whitespace = True
+    option_spec = {}
+    has_content = True
+
+    def run(self):
+
+        self.assert_has_content()
+        node_list = []
+
+        return node_list
+
+## -------------------------------------------------------------------------- ##
+
+class plt_directive(rst.Directive):
+
+    required_arguments = 0
+    optional_arguments = 1
+    final_argument_whitespace = True
+    option_spec = {}
+    has_content = True
+
+    def run(self):
+
+        self.assert_has_content()
+        node_list = []
+
+        return node_list
+
+## -------------------------------------------------------------------------- ##
+
+class ani_directive(rst.Directive):
+
+    required_arguments = 0
+    optional_arguments = 1
+    final_argument_whitespace = True
+    option_spec = {}
+    has_content = True
+
+    def run(self):
+
+        self.assert_has_content()
+        node_list = []
+
+        return node_list
+
+## -------------------------------------------------------------------------- ##
+
+class tog_directive(rst.Directive):
+
+    required_arguments = 0
+    optional_arguments = 1
+    final_argument_whitespace = True
+    option_spec = {}
+    has_content = True
+
+    def run(self):
+
+        self.assert_has_content()
+        node_list = []
+
+        return node_list
+
+
+
