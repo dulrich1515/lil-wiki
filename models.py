@@ -82,8 +82,6 @@ class Page(object):
                     subpages['files'].remove(page)
                     break
 
-            print subpages['dirs']
-            
         if not subpages['dirs'] and not subpages['files']:
             subpages = {}
             

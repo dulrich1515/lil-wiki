@@ -5,6 +5,14 @@ from django import template
 from django.utils.safestring import mark_safe
 
 from docutils.core import publish_parts
+from docutils.parsers import rst
+
+import docutils_extensions
+
+rst.roles.register_local_role('sci', docutils_extensions.sci_role)
+rst.roles.register_local_role('atm', docutils_extensions.atm_role)
+
+## -------------------------------------------------------------------------- ##
 
 register = template.Library()
 
