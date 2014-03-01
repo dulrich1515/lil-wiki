@@ -1,6 +1,6 @@
-/********************/
-/*** General Tags ***/
-/********************/
+/****************/
+/* General Tags */
+/****************/
 
 body {
     font-family:serif;
@@ -143,6 +143,17 @@ pre {
     border:1px solid #ccc;
     border-bottom:none;
     font-style:italic;
+}
+.docutils.footnote {
+    width:100%;
+}
+.docutils.footnote td {
+    vertical-align:middle !important;
+}
+.docutils.footnote td.label {
+    width:2em;
+    text-align:center;
+    vertical-align:top !important;
 }
 
 /*****************/
