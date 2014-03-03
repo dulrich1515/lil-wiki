@@ -17,6 +17,3 @@ wiki_files_path = os.path.join(os.path.dirname(os.path.abspath( __file__ )), wik
 if not os.path.exists(wiki_files_path):
     os.mkdir(wiki_files_path)
     
-settings.STATICFILES_DIRS += (
-    wiki_files_path,
-)
