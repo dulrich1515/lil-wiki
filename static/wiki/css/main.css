@@ -16,6 +16,9 @@ a {
 a:hover {
     text-decoration:underline;
 }
+dt {
+    font-weight:bold;
+}
 h2 {
     margin:0 -0.75em;
     padding:0.70em;
@@ -64,6 +67,12 @@ pre {
 .l { text-align: left; }
 .c { text-align: center; }
 .r { text-align: right; }
+
+.warning {
+    padding:0.5em;
+    border:1px solid red;
+    background:#fcc;
+}
 
 /**************/
 /* Containers */
@@ -132,6 +141,34 @@ pre {
 /* Docutils stuff */
 /******************/
 
+.docutils.footnote {
+    width:100%;
+}
+.docutils.footnote td {
+    vertical-align:middle !important;
+}
+.docutils.literal {
+    border:1px solid #ccc;
+    background:#eee;
+    padding:1px 2px;
+}
+.docutils.footnote td.label {
+    width:2em;
+    text-align:center;
+    vertical-align:top !important;
+}
+.admonition {
+    padding:0 1em;
+    border:1px solid #ccc;
+    background:#eee;
+    /* background-image:url(../img/ast.png); */
+    /* background-position:top=2px left; */
+    /* background-repeat:no-repeat; */
+}
+.admonition-title {
+    font-weight:bold;
+}
+
 .my-docutils.tbl table {
     padding:1em;
     background:#fff;
@@ -144,16 +181,22 @@ pre {
     border-bottom:none;
     font-style:italic;
 }
-.docutils.footnote {
-    width:100%;
-}
-.docutils.footnote td {
-    vertical-align:middle !important;
-}
-.docutils.footnote td.label {
-    width:2em;
+.my-docutils.fig {
+    padding:1em;
+    background:#fff;
+    border:1px solid #ccc;
+    margin:1em auto;
     text-align:center;
-    vertical-align:top !important;
+}
+.my-docutils.fig p {
+    margin-bottom:0;
+}
+.my-docutils img,
+.my-docutils video
+ {
+    max-width:100%;
+	height:auto;
+	-ms-interpolation-mode: bicubic;
 }
 
 /*****************/
@@ -162,7 +205,7 @@ pre {
 
 @media screen and (min-width:960px) {
 /* TABLET or SCREEN */
-    .my-docutils.side {
+    #side-content {
         float:right;
         margin:1em 0 1em 1em;
         max-width:45%;

@@ -1,9 +1,10 @@
-
 from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
+from django.conf.urls.static import static
 from django.core.urlresolvers import reverse
 from django.views.generic.simple import redirect_to
 
+import config
 import views
 
 urlpatterns = patterns('',
@@ -20,3 +21,5 @@ urlpatterns = patterns('',
     
     # url(r'^wiki/.*/$', redirect_to, {'url': '/wiki/'}),
 )
+
+urlpatterns += static(config.wiki_files_url, document_root = config.wiki_files_dir)

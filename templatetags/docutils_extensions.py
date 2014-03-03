@@ -1,10 +1,16 @@
 ﻿from __future__ import division
 from __future__ import unicode_literals
 
+import os
+
 from docutils import nodes
 from docutils.parsers import rst
 
+from PIL import Image
+
 from restructuredtext_tags import rst2html
+
+from .. import config
 
 ## -------------------------------------------------------------------------- ##
 
@@ -437,16 +443,89 @@ class tbl_directive(rst.Directive):
 
 class fig_directive(rst.Directive):
 
+    """
+    ---------------------------
+    Docutils directive: ``fig``
+    ---------------------------
+
+    Inserts a figure. 
+    
+    Example
+    -------
+
+    ::
+
+        .. fig:: Some image here
+            :image: image-filename.png
+            :scale: 0.75
+
+    Options
+    -------
+
+    :image:     Used to insert images. Any content will be ignored. A label
+                will be inserted with the image's filename.
+    :scale:     Used to scale the image.
+    :label:     Used for hyperlinks references. See ``fig`` role.
+
+    Notes
+    -----
+
+    * Argument used for figure caption (optional).
+    * Label defaults to image name.
+    """
+
     required_arguments = 0
     optional_arguments = 1
     final_argument_whitespace = True
-    option_spec = {}
+    option_spec = {
+        'image'     : rst.directives.unchanged,
+        'scale'     : rst.directives.unchanged,
+        'label'     : rst.directives.unchanged,
+    }
     has_content = True
 
     def run(self):
 
-        self.assert_has_content()
+        # self.assert_has_content()
         node_list = []
+
+        try:
+            scale = float(self.options['scale'])
+        except:
+            scale = 1.00
+
+        image = self.options['image']
+
+        check_path = os.path.join(config.wiki_files_dir, image)
+        check_path = os.path.normpath(check_path)
+
+        if not os.path.exists(check_path):
+            figtext = '\n<p class="warning">Missing image : {}</p>\n'.format(image)
+        else:
+            img_width, img_height = Image.open(check_path).size
+            fig_width = int(img_width*scale*0.50)
+
+            if 'label' in self.options.keys():
+                label = nodes.make_id(self.options['label'])
+            else:
+                label = nodes.make_id(image)
+
+            figtext = '\n'
+            figtext += '<div id="fig:{0}" class="my-docutils fig">\n'
+            figtext = figtext.format(label)
+
+            html_path = '/'.join([config.wiki_files_url, image])
+            figtext += '<a href="{0}"><img src="{0}"></a>\n'.format(html_path)
+
+            if self.arguments:
+                figtext += rst2html(self.arguments[0])
+
+            figtext += '</div>\n'
+
+        text = figtext
+
+        node = nodes.raw(text=text, format='html', **self.options)
+        node_list += [node]
 
         return node_list
 
