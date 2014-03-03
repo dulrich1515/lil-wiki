@@ -514,7 +514,7 @@ class fig_directive(rst.Directive):
             figtext += '<div id="fig:{0}" class="my-docutils fig">\n'
             figtext = figtext.format(label)
 
-            html_path = '/'.join([config.wiki_files_url, image])
+            html_path = config.wiki_files_url + image
             figtext += '<a href="{0}"><img src="{0}"></a>\n'.format(html_path)
 
             if self.arguments:
