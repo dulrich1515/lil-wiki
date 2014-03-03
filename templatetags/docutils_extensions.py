@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import os
 
+from django.conf import settings
+
 from docutils import nodes
 from docutils.parsers import rst
 
@@ -488,41 +490,40 @@ class fig_directive(rst.Directive):
 
         # self.assert_has_content()
         node_list = []
+        text = '\n'
 
         try:
             scale = float(self.options['scale'])
         except:
             scale = 1.00
 
-        image = self.options['image']
+        if 'image' in self.options:
+            image = self.options['image']
 
-        check_path = os.path.join(config.wiki_files_dir, image)
-        check_path = os.path.normpath(check_path)
+            check_path = os.path.join(config.wiki_files_path, image)
+            check_path = os.path.normpath(check_path)
 
-        if not os.path.exists(check_path):
-            figtext = '\n<p class="warning">Missing image : {}</p>\n'.format(image)
-        else:
-            img_width, img_height = Image.open(check_path).size
-            fig_width = int(img_width*scale*0.50)
-
-            if 'label' in self.options.keys():
-                label = nodes.make_id(self.options['label'])
+            if not os.path.exists(check_path):
+                text += '<p class="warning">Missing image : {}</p>\n'.format(image)
             else:
-                label = nodes.make_id(image)
+                img_width, img_height = Image.open(check_path).size
+                fig_width = int(img_width*scale*0.50)
 
-            figtext = '\n'
-            figtext += '<div id="fig:{0}" class="my-docutils fig">\n'
-            figtext = figtext.format(label)
+                if 'label' in self.options.keys():
+                    label = nodes.make_id(self.options['label'])
+                else:
+                    label = nodes.make_id(image)
 
-            html_path = config.wiki_files_url + image
-            figtext += '<a href="{0}"><img src="{0}"></a>\n'.format(html_path)
+                text += '<div id="fig:{0}" class="my-docutils fig">\n'.format(label)
 
-            if self.arguments:
-                figtext += rst2html(self.arguments[0])
+                # html_path = reverse('serve_wiki_file', args=(image,))
+                html_path = settings.STATIC_URL + image
+                text += '<a href="{0}"><img src="{0}"></a>\n'.format(html_path)
 
-            figtext += '</div>\n'
+                if self.arguments:
+                    text += rst2html(self.arguments[0])
 
-        text = figtext
+                text += '</div>\n'
 
         node = nodes.raw(text=text, format='html', **self.options)
         node_list += [node]

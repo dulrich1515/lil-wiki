@@ -7,9 +7,11 @@ from django.contrib.auth import logout as logout
 from django.contrib.auth.decorators import login_required
 # from django.core.urlresolvers import reverse
 from django.http import Http404
+from django.http import HttpResponse
 from django.shortcuts import redirect
 
-from config import pg_path
+from config import wiki_pages_path
+from config import wiki_files_path
 from utils import render_to_response
 
 from models import *
@@ -107,7 +109,7 @@ def post(request):
 
             if new_pg.lower() != old_pg.lower(): # case-sensitivity issue here?
             # then pg was changed ... need to delete old file
-                fp = os.path.join(pg_path, old_pg)
+                fp = os.path.join(wiki_pages_path, old_pg)
                 if os.path.isfile(fp):
                     os.remove(fp)
 

@@ -1,15 +1,13 @@
 from django.conf.urls.defaults import patterns
 from django.conf.urls.defaults import url
-from django.conf.urls.static import static
 from django.core.urlresolvers import reverse
 from django.views.generic.simple import redirect_to
 
-import config
 import views
 
 urlpatterns = patterns('',
     url(r'^wiki/$', views.show, name='wiki_root'),
-    url(r'^wiki/show/((?P<pg>((\w+\/)*\w+))?)$', views.show, name='wiki_show'),
+    url(r'^wiki/show/(?P<pg>((\w+\/)*\w+)?)$', views.show, name='wiki_show'),
     url(r'^wiki/edit/(?P<pg>((\w+\/)*\w+)?)$', views.edit, name='wiki_edit'),
 
     url(r'^wiki/list/$', views.list_by_name, name='wiki_list'),
@@ -21,5 +19,3 @@ urlpatterns = patterns('',
     
     # url(r'^wiki/.*/$', redirect_to, {'url': '/wiki/'}),
 )
-
-urlpatterns += static(config.wiki_files_url, document_root = config.wiki_files_dir)

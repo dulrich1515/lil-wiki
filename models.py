@@ -6,12 +6,12 @@ import codecs
 import os
 import re
 
-from config import pg_path
+from config import wiki_pages_path
 
 class Page(object):
     def __init__(self, pg):
         self.pg = pg
-        self.fp = os.path.abspath(os.path.join(pg_path, self.pg))
+        self.fp = os.path.abspath(os.path.join(wiki_pages_path, self.pg))
         if pg:
             self.title = pg.split('/')[-1]
         else:
@@ -104,7 +104,7 @@ class Page(object):
             else: # the page doesn't exist --- before we build it, we need to 
                   # make sure the directory structure is compatible
                 dirs = self.pg.split('/')
-                fp = pg_path
+                fp = wiki_pages_path
                 for d in dirs[:-1]: # these directories should all exist
                     fp = os.path.join(fp, d)
                     if os.path.isfile(fp): # then we need to prepare to push this content into a new directory
