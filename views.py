@@ -5,7 +5,7 @@ import os
 
 from django.contrib.auth import logout as logout
 from django.contrib.auth.decorators import login_required
-# from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -52,6 +52,7 @@ def show(request, pg=''):
     return render_to_response(request, template, context)
 
 
+# @login_required(login_url=reverse('wiki_login')) # not sure why this doesn't work....
 @login_required(login_url='/wiki/login/')
 def edit(request, pg=''):
 # blank will create a *new* page, but how to edit WikiRoot page?

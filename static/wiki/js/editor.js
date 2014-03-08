@@ -126,4 +126,13 @@ $('textarea').live('keydown', function(e){
         $(this).get(0).selectionStart = beg;
         $(this).get(0).selectionEnd = end + 2 * mark.length;
     }
+    
+$('#try-1').click(function(e) {
+    $('#sign_up').lightbox_me({
+        centered: true, 
+        onLoad: function() { 
+            $('#sign_up').find('input:first').focus()
+            }
+        });
+    e.preventDefault();
 });
