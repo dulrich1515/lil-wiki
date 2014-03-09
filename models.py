@@ -96,6 +96,27 @@ class Page(object):
         siblings = self.get_subpages(self.parent, remove=[self])
         return siblings
 
+    # @property
+    # def series(self):
+        # series = []
+        # if self.pg[-4:] = '_001':
+            # for page in self.siblings:
+                # if page.pg[-4:] = '_001' and page.pg[:-4] = self.pg[:-4]
+                    # series = series.append(page)
+        # return series
+        
+    # SOME OLD CODE....
+    # m = re.match('([\w\/]*)_(\d\d\d)$', title)
+    # if m: # this is *already* a multi-part page
+        # if m.group(2) < '999':
+            # parent = m.group(1)
+            # nbr = int(m.group(2))
+            # # new_title = '{0}{1:03d}'.format(parent, nbr + 1)
+            # new_title = '{0}_{1:03d}'.format(parent, nbr + 1)
+            # fp = os.path.join(pg_path, new_title)
+            # if os.path.isfile(fp):
+                # new_title = ''
+
     def save(self, content):
         fp = self.fp
         if not os.path.isfile(self.fp): # then will have to do something unusual
