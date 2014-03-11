@@ -26,7 +26,8 @@ h2 {
 }
 h3 {
 }
-h4 { font-style:italic;
+h4 {
+    font-style:italic;
 }
 table {
     border:1px solid #eee;
@@ -169,6 +170,9 @@ pre {
     font-weight:bold;
 }
 
+.my-docutils.tbl {
+    overflow-x:auto;
+}
 .my-docutils.tbl table {
     padding:1em;
     background:#fff;
