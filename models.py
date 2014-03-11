@@ -71,7 +71,7 @@ class Page(object):
                         pg = page.pg + '/' + pg
                     subpages['files'].append(Page(pg))
                 break
-        
+
         for pg in [x.pg for x in remove]:
             for page in subpages['dirs']:
                 if page.pg == pg:
@@ -84,7 +84,7 @@ class Page(object):
 
         if not subpages['dirs'] and not subpages['files']:
             subpages = {}
-            
+
         return subpages
 
     @property
@@ -96,6 +96,21 @@ class Page(object):
         siblings = self.get_subpages(self.parent, remove=[self])
         return siblings
 
+    @property
+    def series(self):
+        series = []
+        m = re.match('([\w\/]*)_(\d\d\d)$', self.pg)
+        if m: # this page is part of a series
+            for s in self.get_subpages(self.parent)['files']:
+                m1 = re.match('([\w\/]*)_(\d\d\d)$', s.pg)
+                if m1:
+                    print m1.group(1)
+                    if m1.group(1) == m.group(1):
+                        series.append(s)
+            series.sort()
+        return series
+
+
     # @property
     # def series(self):
         # series = []
@@ -104,7 +119,7 @@ class Page(object):
                 # if page.pg[-4:] = '_001' and page.pg[:-4] = self.pg[:-4]
                     # series = series.append(page)
         # return series
-        
+
     # SOME OLD CODE....
     # m = re.match('([\w\/]*)_(\d\d\d)$', title)
     # if m: # this is *already* a multi-part page
@@ -122,7 +137,7 @@ class Page(object):
         if not os.path.isfile(self.fp): # then will have to do something unusual
             if os.path.isdir(self.fp): # then save the content in a special file
                 fp = fp + '/_'
-            else: # the page doesn't exist --- before we build it, we need to 
+            else: # the page doesn't exist --- before we build it, we need to
                   # make sure the directory structure is compatible
                 dirs = self.pg.split('/')
                 fp = wiki_pages_path
@@ -135,11 +150,11 @@ class Page(object):
                     if os.path.isfile(fp + '__'): # then pull this special content into the new directory
                         os.rename(fp + '__', fp + '/_')
                 fp = self.fp # reset in order to prepare to save the content
-                
+
         f = codecs.open(fp, 'w+', 'utf-8')
         f.write(content.strip())
         f.close
-        
+
     def delete(self):
         pass
 

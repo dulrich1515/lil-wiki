@@ -50,6 +50,20 @@ $(document).keydown(function(e) {
     {% endif %}
     {% endif %}
 
+    {% if page.series %}
+    <p>In this series&hellip;</p>
+    <ul>
+        {% for series_page in page.series %}
+        {% if series_page.pg == page.pg %}
+        <li>{{ series_page.title }} ◂ You are here</li>
+        {% else %}
+        <li><a href="{% url wiki_show series_page %}">{{ series_page.title }}</a></li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% comment %}
     {% if page.siblings %}
     <p>Sideways&hellip;</p>
     {% if page.siblings.dirs %}
@@ -67,6 +81,7 @@ $(document).keydown(function(e) {
     </ul>
     {% endif %}
     {% endif %}
+    {% endcomment %}
 
     {% if page.parent %}
     <p>Up to&hellip;</p>
