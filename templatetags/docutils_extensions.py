@@ -622,7 +622,7 @@ class fig_directive(rst.Directive):
                     label = nodes.make_id(image_name)
 
                 text += '<div id="fig:{0}" class="my-docutils fig">\n'.format(label)
-                text += '<a href="{0}"><img src="{0}"></a>\n'.format(image_url)
+                text += '<a href="{0}"><img width={1} src="{0}"></a>\n'.format(image_url,fig_width)
 
                 if self.arguments:
                     text += rst2html(self.arguments[0])
