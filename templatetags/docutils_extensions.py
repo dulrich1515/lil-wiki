@@ -1,16 +1,23 @@
 ﻿from __future__ import division
 from __future__ import unicode_literals
 
+import codecs
+import hashlib
 import os
+import posixpath
+import shutil
+import sys
+
+from subprocess import Popen, PIPE
+from PIL import Image
 
 from django.conf import settings
 
 from docutils import nodes
 from docutils.parsers import rst
 
-from PIL import Image
-
 from restructuredtext_tags import rst2html
+from docutils_templates import LATEX_PREVIEW_TEMPLATE
 
 from .. import config
 
@@ -61,7 +68,7 @@ def sci_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
     return node_list, []
 
 ## -------------------------------------------------------------------------- ##
-    
+
 def atm_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
 
     """
@@ -203,14 +210,14 @@ def atm_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
         'Uup': 115, # Ununpentium
         'Lv' : 116, # Livermorium
         'Uus': 117, # Ununseptium
-        'Uuo': 118, # Ununoctium    
+        'Uuo': 118, # Ununoctium
     }
     specials = {
         'neutron'   : ('n', 1, 0),
         'proton'    : ('p', 1, 1),
         'electron'  : ('e', 0, -1),
     }
-    
+
     try:
         if text in specials:
             symbol, a, z = specials[text]
@@ -218,7 +225,7 @@ def atm_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
             symbol, nbr = text.split('-')
             a = int(nbr)
             z = atomic_numbers[symbol.title()]
-        
+
         offset = len(str(a)) - len(str(z))
         if offset > 0:
             text = r'\({}^{%s}_{\phantom{%s}%s}\text{%s}\)' % (a, offset, z, symbol)
@@ -408,11 +415,11 @@ class tbl_directive(rst.Directive):
             if 'cols' in self.options.keys():
                 colspec = self.options['cols']
             align = {'l': 'left', 'c': 'center', 'r': 'right'}
-                
+
             text = ''
             text += '<div{} class="my-docutils tbl">\n'.format(divid)
             text += '<table>\n'
-            
+
             for tag, rows in [('th', tbl[1]), ('td', tbl[2])]:
                 for row in rows:
                     text += '<tr>\n'
@@ -426,13 +433,13 @@ class tbl_directive(rst.Directive):
                                 colspan = ' colspan="{}"'.format(cell[1] + 1)
                             cellalign = align[colspec[row.index(cell)]]
                             celltext = rst2html('\n'.join(cell[3]), inline=True)
-                            
+
                             text += '<{}{}{} style="text-align:{}">\n'.format(
                                 tag, rowspan, colspan, cellalign)
                             text += '{}\n'.format(celltext)
                             text += '</{}>\n'.format(tag)
                     text += '</tr>\n'
-                
+
             text += '<caption>{}</caption>\n'.format(caption)
             text += '</table>\n'
             text += '</div>\n'
@@ -450,8 +457,8 @@ class fig_directive(rst.Directive):
     Docutils directive: ``fig``
     ---------------------------
 
-    Inserts a figure. 
-    
+    Inserts a figure.
+
     Example
     -------
 
@@ -460,6 +467,14 @@ class fig_directive(rst.Directive):
         .. fig:: Some image here
             :image: image-filename.png
             :scale: 0.75
+
+        .. fig:: Sample Trapezoid
+            :label: trapezoid
+
+            \begin{tikzpicture}
+            \draw [fill=black!10] (-1,0.7) -- (1,0.7)
+            -- (0.7,-0.7) -- (-0.7,-0.7) -- cycle;
+            \end{tikzpicture}
 
     Options
     -------
@@ -473,7 +488,7 @@ class fig_directive(rst.Directive):
     -----
 
     * Argument used for figure caption (optional).
-    * Label defaults to image name.
+    * If image option is used, label defaults to image name.
     """
 
     required_arguments = 0
@@ -488,7 +503,6 @@ class fig_directive(rst.Directive):
 
     def run(self):
 
-        # self.assert_has_content()
         node_list = []
         text = '\n'
 
@@ -498,32 +512,129 @@ class fig_directive(rst.Directive):
             scale = 1.00
 
         if 'image' in self.options:
-            image = self.options['image']
+            image_name = self.options['image']
+            image_path = os.path.join(config.wiki_files_path, image_name)
+            image_url = settings.STATIC_URL + image_name
 
-            check_path = os.path.join(config.wiki_files_path, image)
-            check_path = os.path.normpath(check_path)
-
-            if not os.path.exists(check_path):
-                text += '<p class="warning">Missing image : {}</p>\n'.format(image)
+            if not os.path.exists(image_path):
+                text += '<p class="warning">Missing image : {}</p>\n'.format(image_name)
             else:
-                img_width, img_height = Image.open(check_path).size
+                img_width, img_height = Image.open(image_path).size
                 fig_width = int(img_width*scale*0.50)
 
                 if 'label' in self.options.keys():
                     label = nodes.make_id(self.options['label'])
                 else:
-                    label = nodes.make_id(image)
+                    label = nodes.make_id(image_name)
 
                 text += '<div id="fig:{0}" class="my-docutils fig">\n'.format(label)
-
-                # html_path = reverse('serve_wiki_file', args=(image,))
-                html_path = settings.STATIC_URL + image
-                text += '<a href="{0}"><img src="{0}"></a>\n'.format(html_path)
+                text += '<a href="{0}"><img src="{0}"></a>\n'.format(image_url)
 
                 if self.arguments:
                     text += rst2html(self.arguments[0])
 
                 text += '</div>\n'
+
+        else: # try to construct the image
+            # Unlike a normal image, our reference will come from the content...
+            content = '\n'.join(self.content).replace('\\\\','\\')
+            image_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
+
+            image_name = '{}.png'.format(image_hash)
+            image_path = os.path.join(config.wiki_files_path, 'latex', image_name)
+            image_url = settings.STATIC_URL + '/'.join(['latex', image_name])
+
+            self.options['uri'] = image_url
+
+            # Maybe we already made it? If not, make it now...
+            if not os.path.isfile(image_path):
+
+                print '* Making image {}'.format(image_name)
+                print '* Location: {}'.format(image_path)
+                print '* URL: {}'.format(image_url)
+
+                # Is the output folder even there?
+                d = os.path.dirname(image_path)
+                if not os.path.exists(d):
+                    os.makedirs(d)
+
+                # Set up our folders and filename variables
+                curdir = os.getcwd()
+
+                # Write the LaTeX file to the image folder
+                os.chdir(config.latex_temp_path)
+                if os.path.isfile('temp.png'):
+                    os.remove('temp.png')
+
+                f = codecs.open(os.path.join(config.latex_temp_path, 'templates', 'preview.tex'), 'r', 'utf-8')
+                preview_template = f.read()
+                f.close()
+
+                f = codecs.open('temp.tex', 'w', 'utf-8')
+                f.write(preview_template % content)
+                f.close()
+
+                # Run LaTeX ...
+                cmd = os.path.join(config.tex_path, 'pdflatex')
+                cmd = [cmd,
+                '--interaction=nonstopmode',
+                'temp.tex'
+                ]
+                p = Popen(cmd,stdout=PIPE,stderr=PIPE)
+                out, err = p.communicate()
+
+                cmd = [config.gs_command,
+                '-q',
+                '-dBATCH',
+                '-dNOPAUSE',
+                '-sDEVICE=png16m',
+                '-r600',
+                '-dTextAlphaBits=4',
+                '-dGraphicsAlphaBits=4',
+                '-sOutputFile=temp.png',
+                'temp.pdf',
+                ]
+                p = Popen(cmd,stdout=PIPE,stderr=PIPE)
+                out, err = p.communicate()
+
+                img = Image.open('temp.png')
+                img_scale = 0.40 * scale
+                img_width = int(img_scale * img.size[0])
+                img_height = int(img_scale * img.size[1])
+                img = img.resize((img_width, img_height), Image.ANTIALIAS)
+                img.save('temp.png', 'png')
+
+                # Finally, move the image file and clean up
+                if os.path.isfile('temp.png'):
+                    shutil.copyfile('temp.png', image_path)
+
+                os.chdir(curdir)
+
+            self.options['alt'] = self.content
+
+            text = '\n\n'
+            if os.path.exists(image_path):
+                img_width, img_height = Image.open(image_path).size
+                fig_width = int(img_width*scale*0.50)
+
+                if 'label' in self.options.keys():
+                    label = nodes.make_id(self.options['label'])
+                else:
+                    label = nodes.make_id(image_name)
+
+                text += '<div id="fig:{0}" class="my-docutils fig">\n'.format(label)
+                text += '<a href="{0}"><img src="{0}"></a>\n'.format(image_url)
+
+                if self.arguments:
+                    text += rst2html(self.arguments[0])
+                text += '</div>\n'
+            else:
+                text += '<div class="warning">\n'
+                text += '<strong>File generation error:</strong><br><br>\n'
+                text += '<pre><code>\n'
+                text += '\n' + '\n'.join(self.content) + '\n'
+                text += '</code></pre>\n'
+                text += '</div>\n\n'
 
         node = nodes.raw(text=text, format='html', **self.options)
         node_list += [node]

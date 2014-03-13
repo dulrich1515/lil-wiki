@@ -11,7 +11,6 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 
 from config import wiki_pages_path
-from config import wiki_files_path
 from utils import render_to_response
 
 from models import *
@@ -86,7 +85,7 @@ def post(request):
         elif 'delete' in request.POST:
             if os.path.isfile(page.fp): # error check --- it should exist (create before you annhilate)
                 os.remove(page.fp)
-                
+
             while page.parent: # check if the directory is now empty --- if so, demote the directory
                 path, dirs, files = next(os.walk(page.parent.fp))
                 if dirs: # don't delete if there are subdirectories
@@ -102,7 +101,7 @@ def post(request):
                         if os.path.isfile(fp + '__'): # remove the special content tag
                             os.rename(fp + '__', fp)
                 page = page.parent
-                            
+
             return redirect('wiki_show', page)
 
         elif 'update' in request.POST or 'submit' in request.POST:
