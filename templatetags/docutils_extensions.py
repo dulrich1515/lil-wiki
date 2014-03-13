@@ -17,7 +17,6 @@ from docutils import nodes
 from docutils.parsers import rst
 
 from restructuredtext_tags import rst2html
-from docutils_templates import LATEX_PREVIEW_TEMPLATE
 
 from .. import config
 
