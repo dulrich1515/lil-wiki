@@ -42,7 +42,7 @@ def show(request, pg=''):
     page = Page(pg)
 
     if not page.exists:
-        if not user.is_authenticated:
+        if not request.user.is_authenticated:
             template = 'wiki/404.html'
         else:
             template = 'wiki/edit.html'
