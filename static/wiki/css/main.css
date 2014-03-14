@@ -32,8 +32,15 @@ h4 {
 table {
     border:1px solid #eee;
 }
-th, td {
+tr * {
     padding:2px 5px;
+}
+th {
+    background:#eee;
+    border:1px solid #ccc;
+}
+td {
+    background:#fff;
     border:1px solid #eee;
 }
 hr {
@@ -173,17 +180,44 @@ pre {
 .my-docutils.tbl {
     overflow-x:auto;
 }
+
+
 .my-docutils.tbl table {
     padding:1em;
     background:#fff;
     border:1px solid #ccc;
     margin:1em auto;
 }
+.my-docutils.tbl table * {
+    background:white;
+}
+.my-docutils.tbl table th,td {
+    padding:5px 10px;
+    text-align:center;
+}
+.my-docutils.tbl table th {
+    background:#EEEEEE;
+}
+.my-docutils.tbl table td {
+    background:transparent;
+}
+.my-docutils.tbl table td * {
+    background:transparent
+}
+.my-docutils.tbl table input[type="text"] {
+    border:0;
+    text-align:center;
+    background:transparent
+}
+.my-docutils.tbl table tr:hover {
+    background:#FFFFCC;
+}
 .my-docutils.tbl caption {
     background:#eee;
     border:1px solid #ccc;
     border-bottom:none;
     font-style:italic;
+    padding:5px 10px;
 }
 .my-docutils.fig {
     padding:1em;

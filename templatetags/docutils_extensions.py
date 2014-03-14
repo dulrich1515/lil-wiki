@@ -438,8 +438,8 @@ class tbl_directive(rst.Directive):
                             text += '{}\n'.format(celltext)
                             text += '</{}>\n'.format(tag)
                     text += '</tr>\n'
-
-            text += '<caption>{}</caption>\n'.format(caption)
+            if caption:
+                text += '<caption>{}</caption>\n'.format(caption)
             text += '</table>\n'
             text += '</div>\n'
 

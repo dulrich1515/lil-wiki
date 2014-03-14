@@ -13,7 +13,7 @@ class Page(object):
         self.pg = pg
         self.fp = os.path.abspath(os.path.join(wiki_pages_path, self.pg))
         if pg:
-            self.title = pg.split('/')[-1]
+            self.title = pg.split('/')[-1].replace('_', ' ')
         else:
             self.title = 'WikiRoot'
 

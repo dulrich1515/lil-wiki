@@ -25,13 +25,35 @@ $(document).keydown(function(e) {
 <div{% if user.is_staff %} ondblclick="location.href='{% url wiki_edit page %}';"{% endif %}>
     <h1 id="title">{{ page.title }}</h1>
     <div id="content">
+    {% if page.parent %}
+    <p>Up to: <a href="{% url wiki_show page.parent %}">{{ page.parent.title }}</a></p>
+    {% endif %}
+    {% if page.content %}
     {{ page.content|rst2html }}
+    {% else %}
+    {% if page.children.dirs %}
+    <ul>
+        {% for page in page.children.dirs %}
+        <li>» <a href="{% url wiki_show page %}">{{ page.title }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if page.children.files %}
+    <ul>
+        {% for page in page.children.files %}
+        <li><a href="{% url wiki_show page %}">{{ page.title }}</a></li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endif %}
     </div>
 </div>
 
-{% if page.parent or page.children or page.siblings %}
+{% if page.content %}
+{% if page.children or page.series %}
 <div id="related-pages" class="noprint">
     <h2>Related Pages</h2>
+    
     {% if page.children %}
     <p>Down to&hellip;</p>
     {% if page.children.dirs %}
@@ -63,33 +85,8 @@ $(document).keydown(function(e) {
     </ul>
     {% endif %}
 
-    {% comment %}
-    {% if page.siblings %}
-    <p>Sideways&hellip;</p>
-    {% if page.siblings.dirs %}
-    <ul>
-        {% for page in page.siblings.dirs %}
-        <li>» <a href="{% url wiki_show page %}">{{ page.title }}</a></li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% if page.siblings.files %}
-    <ul>
-        {% for page in page.siblings.files %}
-        <li><a href="{% url wiki_show page %}">{{ page.title }}</a></li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endif %}
-    {% endcomment %}
-
-    {% if page.parent %}
-    <p>Up to&hellip;</p>
-    <ul>
-        <li><a href="{% url wiki_show page.parent %}">{{ page.parent.title }}</a></li>
-    </ul>
-    {% endif %}
 </div>
+{% endif %}
 {% endif %}
 
 <div id="controls" class="noprint">

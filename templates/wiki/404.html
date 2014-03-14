@@ -1,9 +1,12 @@
 {% extends "wiki/base.html" %}
-{% load rst_tags %}
+{% load restructuredtext_tags %}
 
 {% block main-content %}
 <h1 id="title">{{ page.title }}</h1>
 <div id="content">
+    {% if page.parent %}
+    <p>Up to: <a href="{% url wiki_show page.parent %}">{{ page.parent.title }}</a></p>
+    {% endif %}
     <h2>Page not found</h2>
     <p>Sorry, but this file ain't there...</p>
     <ul>

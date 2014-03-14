@@ -7,8 +7,8 @@ import views
 
 urlpatterns = patterns('',
     url(r'^wiki/$', views.show, name='wiki_root'),
-    url(r'^wiki/show/(?P<pg>((\w+\/)*\w+)?)$', views.show, name='wiki_show'),
-    url(r'^wiki/edit/(?P<pg>((\w+\/)*\w+)?)$', views.edit, name='wiki_edit'),
+    url(r'^wiki/show/(?P<pg>(([\w\-]+\/)*[\w\-]+)?)$', views.show, name='wiki_show'),
+    url(r'^wiki/edit/(?P<pg>(([\w\-]+\/)*[\w\-]+)?)$', views.edit, name='wiki_edit'),
 
     url(r'^wiki/list/$', views.list_by_name, name='wiki_list'),
     url(r'^wiki/post/$', views.post, name='wiki_post'),
