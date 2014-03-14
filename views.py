@@ -102,7 +102,7 @@ def post(request):
                             os.rename(fp + '__', fp)
                 page = page.parent
 
-            return redirect('wiki_show', page)
+            return redirect('wiki_show', page.parent)
 
         elif 'update' in request.POST or 'submit' in request.POST:
             page.save(content)
