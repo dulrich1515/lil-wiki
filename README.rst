@@ -5,10 +5,10 @@ My Django based wiki.
 
 - Uses reStructuredText as markup. Chosen for easy extensibility
 
-  - LaTeX for beautiful printing
+  - LaTeX for beautiful printing [WIP]
   - TikZ for beautiful drawing
   - MathJax for beautiful browsing
-  - Some Mathplotlib functionality too...
+  - Some Mathplotlib functionality too... [WIP]
   
 - Simple HTML/CSS structure with an eye to mobile
 - Unobtrusive full screen editor
