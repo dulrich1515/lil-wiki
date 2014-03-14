@@ -55,7 +55,7 @@ $(document).keydown(function(e) {
     <ul>
         {% for series_page in page.series %}
         {% if series_page.pg == page.pg %}
-        <li>{{ series_page.title }} ◂ You are here</li>
+        <li>{{ series_page.title }} ◂ (you are here)</li>
         {% else %}
         <li><a href="{% url wiki_show series_page %}">{{ series_page.title }}</a></li>
         {% endif %}

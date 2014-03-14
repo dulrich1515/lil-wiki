@@ -107,8 +107,7 @@ class Page(object):
                     print m1.group(1)
                     if m1.group(1) == m.group(1):
                         series.append(s)
-            series.sort()
-        return series
+        return sorted(series, key=lambda page: page.pg)
 
     def save(self, content):
         fp = self.fp

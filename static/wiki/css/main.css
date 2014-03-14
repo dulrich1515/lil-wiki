@@ -199,8 +199,8 @@ pre {
 .my-docutils video
  {
     max-width:100%;
-	height:auto;
-	-ms-interpolation-mode: bicubic;
+    height:auto;
+    -ms-interpolation-mode: bicubic;
 }
 
 /*****************/
