@@ -512,10 +512,11 @@ class fig_directive(rst.Directive):
 
         if 'image' in self.options:
             image_name = self.options['image']
-            image_path = os.path.join(config.wiki_files_path, image_name)
-            image_url = settings.STATIC_URL + image_name
+            image_path = os.path.join(settings.MEDIA_ROOT, 'wiki', image_name)
+            image_url = settings.MEDIA_URL + '/'.join(['wiki', image_name])
 
             if not os.path.exists(image_path):
+                print 'Missing: ' + image_path
                 text += '<p class="warning">Missing image : {}</p>\n'.format(image_name)
             else:
                 img_width, img_height = Image.open(image_path).size
@@ -540,8 +541,8 @@ class fig_directive(rst.Directive):
             image_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
 
             image_name = '{}.png'.format(image_hash)
-            image_path = os.path.join(config.wiki_files_path, 'latex', image_name)
-            image_url = settings.STATIC_URL + '/'.join(['latex', image_name])
+            image_path = os.path.join(settings.MEDIA_ROOT, 'wiki', 'latex', image_name)
+            image_url = settings.MEDIA_URL + '/'.join(['wiki', 'latex', image_name])
 
             self.options['uri'] = image_url
 
