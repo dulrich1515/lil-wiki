@@ -177,60 +177,60 @@ pre {
     font-weight:bold;
 }
 
-.my-docutils.tbl {
+.docutils-extensions.tbl {
     overflow-x:auto;
 }
 
 
-.my-docutils.tbl table {
+.docutils-extensions.tbl table {
     padding:1em;
     background:#fff;
     border:1px solid #ccc;
     margin:1em auto;
 }
-.my-docutils.tbl table * {
+.docutils-extensions.tbl table * {
     background:white;
 }
-.my-docutils.tbl table th,td {
+.docutils-extensions.tbl table th,td {
     padding:5px 10px;
     text-align:center;
 }
-.my-docutils.tbl table th {
+.docutils-extensions.tbl table th {
     background:#EEEEEE;
 }
-.my-docutils.tbl table td {
+.docutils-extensions.tbl table td {
     background:transparent;
 }
-.my-docutils.tbl table td * {
+.docutils-extensions.tbl table td * {
     background:transparent
 }
-.my-docutils.tbl table input[type="text"] {
+.docutils-extensions.tbl table input[type="text"] {
     border:0;
     text-align:center;
     background:transparent
 }
-.my-docutils.tbl table tr:hover {
-    background:#FFFFCC;
+.docutils-extensions.tbl table tr:hover {
+    background:#f6f6f6;
 }
-.my-docutils.tbl caption {
+.docutils-extensions.tbl caption {
     background:#eee;
     border:1px solid #ccc;
     border-bottom:none;
     font-style:italic;
     padding:5px 10px;
 }
-.my-docutils.fig {
+.docutils-extensions.fig {
     padding:1em;
     background:#fff;
     border:1px solid #ccc;
     margin:1em auto;
     text-align:center;
 }
-.my-docutils.fig p {
+.docutils-extensions.fig p {
     margin-bottom:0;
 }
-.my-docutils img,
-.my-docutils video
+.docutils-extensions img,
+.docutils-extensions video
  {
     max-width:100%;
     height:auto;

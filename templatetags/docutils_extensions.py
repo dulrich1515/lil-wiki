@@ -416,7 +416,7 @@ class tbl_directive(rst.Directive):
             align = {'l': 'left', 'c': 'center', 'r': 'right'}
 
             text = ''
-            text += '<div{} class="my-docutils tbl">\n'.format(divid)
+            text += '<div{} class="docutils-extensions tbl">\n'.format(divid)
             text += '<table>\n'
 
             for tag, rows in [('th', tbl[1]), ('td', tbl[2])]:
@@ -527,7 +527,7 @@ class fig_directive(rst.Directive):
                 else:
                     label = nodes.make_id(image_name)
 
-                text += '<div id="fig:{0}" class="my-docutils fig">\n'.format(label)
+                text += '<div id="fig:{0}" class="docutils-extensions fig">\n'.format(label)
                 text += '<a href="{0}"><img src="{0}"></a>\n'.format(image_url)
 
                 if self.arguments:
@@ -622,7 +622,7 @@ class fig_directive(rst.Directive):
                 else:
                     label = nodes.make_id(image_name)
 
-                text += '<div id="fig:{0}" class="my-docutils fig">\n'.format(label)
+                text += '<div id="fig:{0}" class="docutils-extensions fig">\n'.format(label)
                 text += '<a href="{0}"><img width={1} src="{0}"></a>\n'.format(image_url,fig_width)
 
                 if self.arguments:
