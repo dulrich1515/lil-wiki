@@ -36,14 +36,27 @@ class Page(object):
     @property
     def content(self, toc=False):
         content = self.raw_content
-        # Allows renaming of auto-links to wiki pages
-        pattern = r'`(.+) <<([\w\/]+)>>`_'
-        repl = r'`\1 <{}/show/\2/>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
+        
+        # Prepend parent to sibling wiki-links
+        pattern = r'<<([\-\w]+)>>'
+        repl = r'<</{}/\1>>'.format(self.parent.pg)
         content = re.sub(pattern, repl, content)
-        # Auto-link to wiki pages (must happen last)
-        pattern = r'<<([\w\/]+)>>'
-        repl = r'`\1 <{}/show/\1/>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
+        
+        # Auto-link wiki-pages
+        pattern = r'`(.*) <<\/([\-\w\/]+)>>`_'
+        repl = r'a `\1 <{}show/\2>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
         content = re.sub(pattern, repl, content)
+        
+        # Expand general wiki-links (must start with slash)
+        pattern = r'<</([\-\w\/]+)>>' # looking for back-tick to avoid converting the named links twice...
+        repl = r'`\1 <</\1>>`_'
+        content = re.sub(pattern, repl, content)
+
+        # Auto-link wiki-pages
+        pattern = r'`(.*) <<\/([\-\w\/]+)>>`_'
+        repl = r'`b \1 <{}show/\2>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
+        content = re.sub(pattern, repl, content)
+        
         if content:
             if toc:
                 content = '.. contents:: Table of contents\n\n' + content
