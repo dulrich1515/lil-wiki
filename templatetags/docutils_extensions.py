@@ -353,6 +353,43 @@ def jargon_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
 
 ## -------------------------------------------------------------------------- ##
 
+class toggle_directive(rst.Directive):
+
+    required_arguments = 0
+    optional_arguments = 1
+    final_argument_whitespace = True
+    option_spec = {
+        'access'     : rst.directives.unchanged,
+    }
+    has_content = True
+
+    def run(self):
+
+        self.assert_has_content()
+        content = '\n'.join(self.content).replace('\\\\','\\')
+
+        button_text = ''
+        if self.arguments:
+            button_text = self.arguments[0]
+
+        if 'access' in self.options.keys():
+            access = self.options['access']
+
+        text = ''
+        text += '<div class="docutils-extensions toggle">\n'
+        text += '<p><input class="toggler" type="button" value="{0}"></p>\n'.format(button_text)
+        text += '<div class="togglee" style="display:none">\n'
+        text += rst2html(content) + '\n'
+        text += '</div>\n'
+        text += '</div>\n'
+
+        node = nodes.raw(text=text, format='html', **self.options)
+        node_list = [node]
+
+        return node_list
+
+## -------------------------------------------------------------------------- ##
+
 class tbl_directive(rst.Directive):
 
     required_arguments = 0
@@ -676,21 +713,3 @@ class ani_directive(rst.Directive):
         return node_list
 
 ## -------------------------------------------------------------------------- ##
-
-class tog_directive(rst.Directive):
-
-    required_arguments = 0
-    optional_arguments = 1
-    final_argument_whitespace = True
-    option_spec = {}
-    has_content = True
-
-    def run(self):
-
-        self.assert_has_content()
-        node_list = []
-
-        return node_list
-
-
-

@@ -13,10 +13,9 @@ rst.roles.register_local_role('jargon', docutils_extensions.jargon_role)
 # rst.roles.register_local_role('plt', docutils_extensions.ref_role)
 # rst.roles.register_local_role('ani', docutils_extensions.ref_role)
 
+rst.directives.register_directive('toggle', docutils_extensions.toggle_directive)
+
 rst.directives.register_directive('tbl', docutils_extensions.tbl_directive)
 rst.directives.register_directive('fig', docutils_extensions.fig_directive)
-rst.directives.register_directive('plt', docutils_extensions.plt_directive)
-rst.directives.register_directive('ani', docutils_extensions.plt_directive)
-
-# rst.directives.register_directive('tog', docutils_extensions.tog_directive)
-
+# rst.directives.register_directive('plt', docutils_extensions.plt_directive)
+# rst.directives.register_directive('ani', docutils_extensions.plt_directive)
