@@ -1,5 +1,22 @@
 ﻿{% extends "wiki/base.html" %}
 
+{% block extra-script %}
+$(document).keydown(function(e) {
+    var keycode = e.which || e.keyCode;
+    var key = String.fromCharCode(keycode).toLowerCase()
+
+    if (key == 'l' && e.ctrlKey)
+    {
+        {% if user.is_authenticated %}
+        location.href='{% url wiki_logout %}?next={% url wiki_show page %}';
+        {% else %}
+        location.href='{% url wiki_login %}?next={% url wiki_show page %}';
+        {% endif %}
+        e.preventDefault();
+    }
+});
+{% endblock %}
+
 {% block main-content %}
 <h1 id="title">WikiRoot</h1>
 <div id="content">
