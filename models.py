@@ -13,9 +13,11 @@ class Page(object):
         self.pg = pg
         self.fp = os.path.abspath(os.path.join(wiki_pages_path, self.pg))
         if pg:
-            self.title = pg.split('/')[-1].replace('_', ' ')
+            self.title = pg.split('/')[-1]
         else:
             self.title = 'WikiRoot'
+        self.title2 = self.title.replace('_', ' ')
+
 
     @property
     def exists(self):
@@ -36,27 +38,40 @@ class Page(object):
     @property
     def content(self, toc=False):
         content = self.raw_content
-        
-        # Prepend parent to sibling wiki-links
-        pattern = r'<<([\-\w]+)>>'
-        repl = r'<</{}/\1>>'.format(self.parent.pg)
-        content = re.sub(pattern, repl, content)
-        
-        # Auto-link wiki-pages
-        pattern = r'`(.*) <<\/([\-\w\/]+)>>`_'
-        repl = r'a `\1 <{}show/\2>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
-        content = re.sub(pattern, repl, content)
-        
-        # Expand general wiki-links (must start with slash)
-        pattern = r'<</([\-\w\/]+)>>' # looking for back-tick to avoid converting the named links twice...
-        repl = r'`\1 <</\1>>`_'
+
+        # These MUST go in this order...
+        # (is this really the best way to do this?)
+
+        # 1a. Prepend parent to named child wiki-links
+        pattern = r'`(.*) <<([\-\w]+)>>`_'
+        repl = r'`\1 <</{}/\2>>`_'.format(self.pg)
         content = re.sub(pattern, repl, content)
 
-        # Auto-link wiki-pages
-        pattern = r'`(.*) <<\/([\-\w\/]+)>>`_'
-        repl = r'`b \1 <{}show/\2>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
+        # 2a. Prepend parent to remaining child wiki-links
+        pattern = r'<<([\-\w]+)>>'
+        repl = r'`\1 <</{}/\1>>`_'.format(self.pg)
         content = re.sub(pattern, repl, content)
-        
+
+        # 1b. Prepend parent to named sibling wiki-links
+        pattern = r'`(.*) <<\.\/([\-\w]+)>>`_'
+        repl = r'`\1 <</{}/\2>>`_'.format(self.parent.pg)
+        content = re.sub(pattern, repl, content)
+
+        # 2b. Prepend parent to remaining sibling wiki-links
+        pattern = r'<<\.\/([\-\w]+)>>'
+        repl = r'`\1 <</{}/\1>>`_'.format(self.parent.pg)
+        content = re.sub(pattern, repl, content)
+
+        # 3. Expand lone wiki-links (must start with slash)
+        pattern = r'<</([\-\w\/]+)>>([^`])' # looking for back-tick to avoid converting the named links twice...
+        repl = r'`\1 <</\1>>`_\2'
+        content = re.sub(pattern, repl, content)
+
+        # 4. Auto-link all wiki-pages
+        pattern = r'`(.*) <<\/([\-\w\/]+)>>`_'
+        repl = r'`\1 <{}show/\2>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
+        content = re.sub(pattern, repl, content)
+
         if content:
             if toc:
                 content = '.. contents:: Table of contents\n\n' + content
