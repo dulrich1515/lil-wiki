@@ -6,7 +6,7 @@ $(document).keydown(function(e) {
     var keycode = e.which || e.keyCode;
     var key = String.fromCharCode(keycode).toLowerCase()
 
-    {% if user.is_staff %}
+    {% if user.is_authenticated %}
     if (key == 'e' && e.ctrlKey)
     {
         location.href='{% url wiki_edit page %}';
@@ -16,6 +16,15 @@ $(document).keydown(function(e) {
     if (key == 'p' && e.ctrlKey)
     {
         window.print()
+        e.preventDefault();
+    }
+    if (key == 'l' && e.ctrlKey)
+    {
+        {% if user.is_authenticated %}
+        location.href='{% url wiki_logout %}?next={% url wiki_show page %}';
+        {% else %}
+        location.href='{% url wiki_login %}?next={% url wiki_show page %}';
+        {% endif %}
         e.preventDefault();
     }
 });
@@ -53,7 +62,7 @@ $(document).keydown(function(e) {
 {% if page.children or page.series %}
 <div id="related-pages" class="noprint">
     <h2>Related Pages</h2>
-    
+
     {% if page.children %}
     <p>Down to&hellip;</p>
     {% if page.children.dirs %}
@@ -92,7 +101,7 @@ $(document).keydown(function(e) {
 <div id="controls" class="noprint">
     <h2>Page Controls</h2>
     <ul id="control_list">
-        {% if user.is_staff %}
+        {% if user.is_authenticated %}
         <li><a href="{% url wiki_logout %}?next={% url wiki_show page %}">Logout</a></li>
         {% else %}
         <li><a href="{% url wiki_login %}?next={% url wiki_show page %}">Login</a></li>
