@@ -8,10 +8,11 @@ from scipy.fftpack import fft,ifft
 from scipy.spatial.distance import pdist, squareform
 
 from matplotlib import pyplot as plt
+from matplotlib import animation
 
-# matplotlib.rcParams['xtick.direction'] = 'out'
-# matplotlib.rcParams['ytick.direction'] = 'out'
+fig = plt.figure()
 
 %s
 
-plt.savefig('temp.png')
+ani = animation.FuncAnimation(fig, animate, init_func=init, frames=200, interval=20, blit=True)
+ani.save('temp.mp4', fps=30, extra_args=['-vcodec', 'libx264', '-pix_fmt', 'yuv420p'])

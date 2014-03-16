@@ -623,14 +623,17 @@ class fig_directive(rst.Directive):
             content = '\n'.join(self.content).replace('\\\\','\\')
             image_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
 
-            image_name = '{}.png'.format(image_hash)
-
             if 'template' in self.options:
                 type, template = self.options['template'].split('-')
             else:
                 type = 'latex'
                 template = 'preview'
-                
+
+            if template == 'animation':
+                image_name = '{}.mp4'.format(image_hash)
+            else:
+                image_name = '{}.png'.format(image_hash)
+
             image_path = os.path.join(settings.MEDIA_ROOT, WIKI_IMAGE_FOLDER, SYSGEN_FOLDER, image_name)
             image_url = settings.MEDIA_URL + '/'.join([WIKI_IMAGE_FOLDER, SYSGEN_FOLDER, image_name])
                 
@@ -672,6 +675,9 @@ class fig_directive(rst.Directive):
     def build_image(self, image_path, content, type, template):
         print '* Trying to build {}'.format(image_path)
 
+        ext = os.path.basename(image_path).split('.')[1]
+        tempfile = '.'.join(['temp.', ext])
+        
         try:
             # Let's remember where we came from...
             curdir = os.getcwd()
@@ -680,12 +686,13 @@ class fig_directive(rst.Directive):
             # Move to proper working directory for this type of content
             os.chdir(newdir)
             print '* Moved to work directory at {}'.format(newdir)
-            if os.path.isfile('temp.png'):
-                os.remove('temp.png')
+            if os.path.isfile(tempfile):
+                os.remove(tempfile)
 
-            print '* Construction type = {}'.format(type)
+            print '* Construction template = {}-{}'.format(type, template)
             if type == 'latex':
             
+                # Load template to memory
                 template += '.tex'
                 template_path = os.path.join(newdir, template)
                 f = codecs.open(template_path, 'r', 'utf-8')
@@ -726,6 +733,11 @@ class fig_directive(rst.Directive):
                 
             elif type == 'matplotlib':
                 
+                # Have to have some serious protection here....
+                if '\nimport' in content:
+                    assert False
+                    
+                # Load template to memory
                 template += '.py'
                 template_path = os.path.join(newdir, template)
                 f = codecs.open(template_path, 'r', 'utf-8')
@@ -752,12 +764,13 @@ class fig_directive(rst.Directive):
 
             if type: # then capture the file we just built            
 
-                print '* Resizing temp.png'
-                img = Image.open('temp.png')
-                img_width = int(img_scale * img.size[0])
-                img_height = int(img_scale * img.size[1])
-                img = img.resize((img_width, img_height), Image.ANTIALIAS)
-                img.save('temp.png', 'png')
+                if ext == 'png':
+                    print '* Resizing temp.png'
+                    img = Image.open(tempfile)
+                    img_width = int(img_scale * img.size[0])
+                    img_height = int(img_scale * img.size[1])
+                    img = img.resize((img_width, img_height), Image.ANTIALIAS)
+                    img.save(tempfile, 'png')
 
                 # Is the output folder even there?
                 d = os.path.dirname(image_path)
@@ -765,10 +778,10 @@ class fig_directive(rst.Directive):
                     os.makedirs(d)
 
                 # Finally, move the image file and clean up
-                if os.path.isfile('temp.png'):
-                    shutil.copyfile('temp.png', image_path)
+                if os.path.exists(tempfile):
+                    shutil.copyfile(tempfile, image_path)
 
-                print '* New image saved at {}'.format(image_path)
+                print '* New file saved at {}'.format(image_path)
                 os.chdir(curdir)
                 
         except:
