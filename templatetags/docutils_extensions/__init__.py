@@ -18,11 +18,20 @@ from docutils import nodes
 from docutils.core import publish_parts
 from docutils.parsers import rst
 
-tex_path = settings.TEX_PATH
-gs_command = settings.GS_CMD
+# System-specific commands/locations
+LATEX_PATH = settings.TEX_PATH
+GS_COMMAND = settings.GS_CMD
+PYTHON_CMD = settings.PYTHON_CMD
 
-work_path = ''
-work_path = os.path.join(os.path.dirname(os.path.abspath( __file__ )), work_path)
+# Directory within docutils_extensions to find working folders
+WORK_PATH = ''
+WORK_PATH = os.path.join(os.path.dirname(os.path.abspath( __file__ )), WORK_PATH)
+
+# Directory within MEDIA_ROOT where wiki images are
+WIKI_IMAGE_FOLDER = 'wiki'
+
+# Directory within WIKI_IMAGE_FOLDER where system-generated images will go
+SYSGEN_FOLDER = 'sysgen'
 
 ## -------------------------------------------------------------------------- ##
 
@@ -567,8 +576,8 @@ class fig_directive(rst.Directive):
                 will be inserted with the image's filename.
     :scale:     Used to scale the image.
     :label:     Used for hyperlinks references. See ``fig`` role.
-    :template:  Used to point to proper templale when creating image.
-                Default is ``latex-preview``.
+    :template:  Used to point to proper templale when creating image. Default 
+                is ``latex-preview``.
 
     Notes
     -----
@@ -600,11 +609,11 @@ class fig_directive(rst.Directive):
 
         if 'image' in self.options:
             image_name = self.options['image']
-            image_path = os.path.join(settings.MEDIA_ROOT, 'wiki', image_name)
-            image_url = settings.MEDIA_URL + '/'.join(['wiki', image_name])
+            image_path = os.path.join(settings.MEDIA_ROOT, WIKI_IMAGE_FOLDER, image_name)
+            image_url = settings.MEDIA_URL + '/'.join([WIKI_IMAGE_FOLDER, image_name])
 
             if not os.path.exists(image_path):
-                print 'Missing: ' + image_path
+                print '* ERROR: Missing: ' + image_path
                 text += '<p class="warning">'
                 text += 'Missing image : {}'.format(image_name)
                 text += '</p>\n'.format(image_name)
@@ -622,16 +631,16 @@ class fig_directive(rst.Directive):
                 type = 'latex'
                 template = 'preview'
                 
-            image_path = os.path.join(settings.MEDIA_ROOT, 'wiki', type, image_name)
-            image_url = settings.MEDIA_URL + '/'.join(['wiki', type, image_name])
+            image_path = os.path.join(settings.MEDIA_ROOT, WIKI_IMAGE_FOLDER, SYSGEN_FOLDER, image_name)
+            image_url = settings.MEDIA_URL + '/'.join([WIKI_IMAGE_FOLDER, SYSGEN_FOLDER, image_name])
                 
             if not os.path.exists(image_path):
                 self.build_image(image_path, content, type, template)
 
             if not os.path.exists(image_path):
-                print 'Missing: ' + image_path
+                print '* ERROR: Missing: ' + image_path
                 text += '<div class="warning">\n'
-                text += '<strong>File generation error:</strong><br>\n'
+                text += '<h4>File generation error:</h4>\n'
                 text += '<pre><code>'
                 text += '\n'.join(self.content) + '\n'
                 text += '</code></pre>\n'
@@ -664,28 +673,25 @@ class fig_directive(rst.Directive):
         print '* Trying to build {}'.format(image_path)
 
         try:
-            # Is the output folder even there?
-            d = os.path.dirname(image_path)
-            if not os.path.exists(d):
-                os.makedirs(d)
-
             # Let's remember where we came from...
             curdir = os.getcwd()
-            newdir = os.path.join(work_path, type)
+            newdir = os.path.join(WORK_PATH, type)
 
             # Move to proper working directory for this type of content
-            print '* Moving to {}'.format(newdir)
             os.chdir(newdir)
+            print '* Moved to work directory at {}'.format(newdir)
             if os.path.isfile('temp.png'):
                 os.remove('temp.png')
 
+            print '* Construction type = {}'.format(type)
             if type == 'latex':
+            
                 template += '.tex'
                 template_path = os.path.join(newdir, template)
                 f = codecs.open(template_path, 'r', 'utf-8')
                 template = f.read()
                 f.close()
-                print '* Using template at {}'.format(template_path)
+                print '* Template found at {}'.format(template_path)
                 
                 # Write the LaTeX file to the working folder
                 f = codecs.open('temp.tex', 'w', 'utf-8')
@@ -693,7 +699,7 @@ class fig_directive(rst.Directive):
                 f.close()
 
                 print '* Running LaTeX (temp.tex --> temp.pdf)'
-                cmd = os.path.join(tex_path, 'pdflatex')
+                cmd = os.path.join(LATEX_PATH, 'pdflatex')
                 cmd = [cmd,
                 '--interaction=nonstopmode',
                 'temp.tex'
@@ -702,7 +708,7 @@ class fig_directive(rst.Directive):
                 out, err = p.communicate()
 
                 print '* Running Ghostscript (temp.pdf --> temp.png)'
-                cmd = [gs_command,
+                cmd = [GS_COMMAND,
                 '-q',
                 '-dBATCH',
                 '-dNOPAUSE',
@@ -715,14 +721,48 @@ class fig_directive(rst.Directive):
                 ]
                 p = Popen(cmd,stdout=PIPE,stderr=PIPE)
                 out, err = p.communicate()
-
-                print '* Resizing and moving temp.png'
-                img = Image.open('temp.png')
+                
                 img_scale = 0.20 # not sure why, but this just "looks right"
+                
+            elif type == 'matplotlib':
+                
+                template += '.py'
+                template_path = os.path.join(newdir, template)
+                f = codecs.open(template_path, 'r', 'utf-8')
+                template = f.read()
+                f.close()
+                print '* Template found at {}'.format(template_path)
+
+                # Write the matplotlib file to the working folder
+                f = codecs.open('temp.py', 'w', 'utf-8')
+                f.write(template % content)
+                f.close()
+                
+                # Run matplotlib ...
+                cmd = [PYTHON_CMD, 'temp.py']
+                p = Popen(cmd,stdout=PIPE,stderr=PIPE)
+                out, err = p.communicate()
+
+                img_scale = 0.70 # not sure why, but this just "looks right"
+                
+            else:
+            
+                type = None
+                img_scale = 1.00
+
+            if type: # then capture the file we just built            
+
+                print '* Resizing temp.png'
+                img = Image.open('temp.png')
                 img_width = int(img_scale * img.size[0])
                 img_height = int(img_scale * img.size[1])
                 img = img.resize((img_width, img_height), Image.ANTIALIAS)
                 img.save('temp.png', 'png')
+
+                # Is the output folder even there?
+                d = os.path.dirname(image_path)
+                if not os.path.exists(d):
+                    os.makedirs(d)
 
                 # Finally, move the image file and clean up
                 if os.path.isfile('temp.png'):
@@ -730,9 +770,6 @@ class fig_directive(rst.Directive):
 
                 print '* New image saved at {}'.format(image_path)
                 os.chdir(curdir)
-                
-            else:
-                pass
                 
         except:
             pass

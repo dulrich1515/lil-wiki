@@ -77,11 +77,14 @@ pre {
 .r { text-align: right; }
 
 .warning {
-    padding:0.5em;
-    border:1px solid red;
-    background:#fcc;
+    padding:1em;
+    border:1px dotted red;
+    background:#fee;
 }
-
+.warning h4 {
+    margin:0;
+    color:red;
+}
 /**************/
 /* Containers */
 /**************/
