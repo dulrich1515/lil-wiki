@@ -12,13 +12,54 @@ from subprocess import Popen, PIPE
 from PIL import Image
 
 from django.conf import settings
+from django.utils.safestring import mark_safe
 
 from docutils import nodes
+from docutils.core import publish_parts
 from docutils.parsers import rst
 
-from restructuredtext_tags import rst2html
+tex_path = settings.TEX_PATH
+gs_command = settings.GS_CMD
 
-from .. import config
+work_path = ''
+work_path = os.path.join(os.path.dirname(os.path.abspath( __file__ )), work_path)
+
+## -------------------------------------------------------------------------- ##
+
+def rst2html(source, initial_header_level=2, inline=False):
+    if source:
+        source = '.. default-role:: math\n\n' + source
+        writer_name = 'html'
+        
+        settings_overrides = {
+            'compact_lists' : True,
+            'footnote_references' : 'superscript',
+            'math_output' : 'MathJax',
+            'stylesheet_path' : None,
+            'initial_header_level' : initial_header_level,
+            'doctitle_xform' : 0,
+        }
+
+        html = publish_parts(
+            source=source,
+            writer_name=writer_name,
+            settings_overrides=settings_overrides,
+        )['body'].strip()
+
+        if inline:
+            if html[:3] == '<p>' and html[-4:] == '</p>':
+                html = html[3:-4]
+            
+        html = html.replace('...','&hellip;')
+        html = html.replace('---','&mdash;')
+        html = html.replace('--','&ndash;')
+        # oops ... need to reverse these back
+        html = html.replace('<!&ndash;','<!--')
+        html = html.replace('&ndash;>','-->')
+    else:
+        html = ''
+
+    return mark_safe(html)
 
 ## -------------------------------------------------------------------------- ##
 
@@ -244,67 +285,67 @@ def atm_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
 
 ## -------------------------------------------------------------------------- ##
 
-def ref_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
+# def ref_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
 
-    """
-    ----------------------
-    Docutils role: ``ref``
-    ----------------------
+    # """
+    # ----------------------
+    # Docutils role: ``ref``
+    # ----------------------
 
-    Inserts a hyperlink reference to a figure or table with a custom label.
+    # Inserts a hyperlink reference to a figure or table with a custom label.
 
-    Example
-    -------
+    # Example
+    # -------
 
-    ::
+    # ::
 
-        :ref:`image-filename.png`
+        # :ref:`image-filename.png`
 
-    This will hyperlink to::
+    # This will hyperlink to::
 
-        .. fig:: Some image here
-            :image: image-filename.png
-            :scale: 0.75
+        # .. fig:: Some image here
+            # :image: image-filename.png
+            # :scale: 0.75
 
-    or
+    # or
 
-    ::
+    # ::
 
-        :fig:`trapezoid`
+        # :fig:`trapezoid`
 
-    This will hyperlink to::
+    # This will hyperlink to::
 
-        .. fig:: Sample Trapezoid
-            :position: side
-            :label: trapezoid
+        # .. fig:: Sample Trapezoid
+            # :position: side
+            # :label: trapezoid
 
-            \begin{tikzpicture}
-            \draw [fill=black!10] (-1,0.7) -- (1,0.7)
-            -- (0.7,-0.7) -- (-0.7,-0.7) -- cycle;
-            \end{tikzpicture}
+            # \begin{tikzpicture}
+            # \draw [fill=black!10] (-1,0.7) -- (1,0.7)
+            # -- (0.7,-0.7) -- (-0.7,-0.7) -- cycle;
+            # \end{tikzpicture}
 
-    Notes
-    -----
+    # Notes
+    # -----
 
-    * Works only for ``latex`` writer
-    * Partial support for ``html`` writer
-    """
+    # * Works only for ``latex`` writer
+    # * Partial support for ``html`` writer
+    # """
 
-    ref = nodes.make_id(text)
-    if role in ['fig', 'tbl']:
-        ref = role + ':' + ref
+    # ref = nodes.make_id(text)
+    # if role in ['fig', 'tbl']:
+        # ref = role + ':' + ref
 
-    t = dict()
+    # t = dict()
 
-    t['latex'] = r'\hyperref[%s]{\ref*{%s}}' % (ref, ref)
-    t['html']  = r'<a href="#%s">[link]</a>' % (ref,)
+    # t['latex'] = r'\hyperref[%s]{\ref*{%s}}' % (ref, ref)
+    # t['html']  = r'<a href="#%s">[link]</a>' % (ref,)
 
-    node_list = [
-        nodes.raw(text=t['latex'], format='latex'),
-        nodes.raw(text=t['html'], format='html')
-    ]
+    # node_list = [
+        # nodes.raw(text=t['latex'], format='latex'),
+        # nodes.raw(text=t['html'], format='html')
+    # ]
 
-    return node_list, []
+    # return node_list, []
 
 ## -------------------------------------------------------------------------- ##
 
@@ -526,7 +567,7 @@ class fig_directive(rst.Directive):
                 will be inserted with the image's filename.
     :scale:     Used to scale the image.
     :label:     Used for hyperlinks references. See ``fig`` role.
-    :template:  Used to point to proper tempalte when creating image.
+    :template:  Used to point to proper templale when creating image.
                 Default is ``latex-preview``.
 
     Notes
@@ -543,13 +584,14 @@ class fig_directive(rst.Directive):
         'image'     : rst.directives.unchanged,
         'scale'     : rst.directives.unchanged,
         'label'     : rst.directives.unchanged,
+        'template'  : rst.directives.unchanged,
     }
     has_content = True
 
     def run(self):
 
         node_list = []
-        text = '\n'
+        text = ''
         
         try:
             scale = float(self.options['scale'])
@@ -560,87 +602,98 @@ class fig_directive(rst.Directive):
             image_name = self.options['image']
             image_path = os.path.join(settings.MEDIA_ROOT, 'wiki', image_name)
             image_url = settings.MEDIA_URL + '/'.join(['wiki', image_name])
-            
+
             if not os.path.exists(image_path):
                 print 'Missing: ' + image_path
-                text += '<p class="warning">Missing image : {}</p>\n'.format(image_name)
+                text += '<p class="warning">'
+                text += 'Missing image : {}'.format(image_name)
+                text += '</p>\n'.format(image_name)
         else:
-            image_name = self.build_image()
-            if not image_name:
+            # Unlike a normal image, our reference will come from the content...
+            self.assert_has_content()
+            content = '\n'.join(self.content).replace('\\\\','\\')
+            image_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
+
+            image_name = '{}.png'.format(image_hash)
+
+            if 'template' in self.options:
+                type, template = self.options['template'].split('-')
+            else:
+                type = 'latex'
+                template = 'preview'
+                
+            image_path = os.path.join(settings.MEDIA_ROOT, 'wiki', type, image_name)
+            image_url = settings.MEDIA_URL + '/'.join(['wiki', type, image_name])
+                
+            if not os.path.exists(image_path):
+                self.build_image(image_path, content, type, template)
+
+            if not os.path.exists(image_path):
+                print 'Missing: ' + image_path
                 text += '<div class="warning">\n'
-                text += '<strong>File generation error:</strong><br><br>\n'
-                text += '<pre><code>\n'
-                text += '\n' + '\n'.join(self.content) + '\n'
+                text += '<strong>File generation error:</strong><br>\n'
+                text += '<pre><code>'
+                text += '\n'.join(self.content) + '\n'
                 text += '</code></pre>\n'
                 text += '</div>\n\n'
                 
-                
-                
-                
-        if not os.path.exists(image_path):
-            print 'Missing: ' + image_path
-            text += '<p class="warning">Missing image : {}</p>\n'.format(image_name)
-        else:
-            img_width, img_height = Image.open(image_path).size
-            fig_width = int(img_width*scale*0.50)
-
+        if not text:
             if 'label' in self.options.keys():
                 label = nodes.make_id(self.options['label'])
             else:
                 label = nodes.make_id(image_name)
 
             text += '<div id="fig:{0}" class="docutils-extensions fig">\n'.format(label)
-            text += '<a href="{0}"><img src="{0}"></a>\n'.format(image_url)
+            
+            i = Image.open(image_path)
+            image_width = int(scale * i.size[0])
+            
+            text += '<a href="{0}"><img width="{1}px" src="{0}"></a>\n'.format(image_url, image_width)
 
             if self.arguments:
                 text += rst2html(self.arguments[0])
 
-            text += '</div>\n'
+            text += '</div>\n'            
 
-            
-            
-            
-        else: # try to construct the image
-            # Unlike a normal image, our reference will come from the content...
-            content = '\n'.join(self.content).replace('\\\\','\\')
-            image_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
+        node = nodes.raw(text=text, format='html', **self.options)
+        node_list += [node]
 
-            image_name = '{}.png'.format(image_hash)
-            image_path = os.path.join(settings.MEDIA_ROOT, 'wiki', 'latex', image_name)
-            image_url = settings.MEDIA_URL + '/'.join(['wiki', 'latex', image_name])
+        return node_list
+        
+    def build_image(self, image_path, content, type, template):
+        print '* Trying to build {}'.format(image_path)
 
-            self.options['uri'] = image_url
+        try:
+            # Is the output folder even there?
+            d = os.path.dirname(image_path)
+            if not os.path.exists(d):
+                os.makedirs(d)
 
-            # Maybe we already made it? If not, make it now...
-            if not os.path.isfile(image_path):
+            # Let's remember where we came from...
+            curdir = os.getcwd()
+            newdir = os.path.join(work_path, type)
 
-                print '* Making image {}'.format(image_name)
-                print '* Location: {}'.format(image_path)
-                print '* URL: {}'.format(image_url)
+            # Move to proper working directory for this type of content
+            print '* Moving to {}'.format(newdir)
+            os.chdir(newdir)
+            if os.path.isfile('temp.png'):
+                os.remove('temp.png')
 
-                # Is the output folder even there?
-                d = os.path.dirname(image_path)
-                if not os.path.exists(d):
-                    os.makedirs(d)
-
-                # Set up our folders and filename variables
-                curdir = os.getcwd()
-
-                # Write the LaTeX file to the image folder
-                os.chdir(config.latex_template_path, '_')
-                if os.path.isfile('temp.png'):
-                    os.remove('temp.png')
-
-                f = codecs.open(os.path.join(config.latex_template_path, 'preview.tex'), 'r', 'utf-8')
-                preview_template = f.read()
+            if type == 'latex':
+                template += '.tex'
+                template_path = os.path.join(newdir, template)
+                f = codecs.open(template_path, 'r', 'utf-8')
+                template = f.read()
                 f.close()
-
+                print '* Using template at {}'.format(template_path)
+                
+                # Write the LaTeX file to the working folder
                 f = codecs.open('temp.tex', 'w', 'utf-8')
-                f.write(preview_template % content)
+                f.write(template % content)
                 f.close()
 
-                # Run LaTeX ...
-                cmd = os.path.join(config.tex_path, 'pdflatex')
+                print '* Running LaTeX (temp.tex --> temp.pdf)'
+                cmd = os.path.join(tex_path, 'pdflatex')
                 cmd = [cmd,
                 '--interaction=nonstopmode',
                 'temp.tex'
@@ -648,12 +701,13 @@ class fig_directive(rst.Directive):
                 p = Popen(cmd,stdout=PIPE,stderr=PIPE)
                 out, err = p.communicate()
 
-                cmd = [config.gs_command,
+                print '* Running Ghostscript (temp.pdf --> temp.png)'
+                cmd = [gs_command,
                 '-q',
                 '-dBATCH',
                 '-dNOPAUSE',
                 '-sDEVICE=png16m',
-                '-r600',
+                '-r600', # this number should be changed with img_scale below
                 '-dTextAlphaBits=4',
                 '-dGraphicsAlphaBits=4',
                 '-sOutputFile=temp.png',
@@ -662,8 +716,9 @@ class fig_directive(rst.Directive):
                 p = Popen(cmd,stdout=PIPE,stderr=PIPE)
                 out, err = p.communicate()
 
+                print '* Resizing and moving temp.png'
                 img = Image.open('temp.png')
-                img_scale = 0.40 * scale
+                img_scale = 0.20 # not sure why, but this just "looks right"
                 img_width = int(img_scale * img.size[0])
                 img_height = int(img_scale * img.size[1])
                 img = img.resize((img_width, img_height), Image.ANTIALIAS)
@@ -673,146 +728,18 @@ class fig_directive(rst.Directive):
                 if os.path.isfile('temp.png'):
                     shutil.copyfile('temp.png', image_path)
 
+                print '* New image saved at {}'.format(image_path)
                 os.chdir(curdir)
-
-            self.options['alt'] = self.content
-
-            text = '\n\n'
-            if os.path.exists(image_path):
-                img_width, img_height = Image.open(image_path).size
-                fig_width = int(img_width*scale*0.50)
-
-                if 'label' in self.options.keys():
-                    label = nodes.make_id(self.options['label'])
-                else:
-                    label = nodes.make_id(image_name)
-
-                text += '<div id="fig:{0}" class="docutils-extensions fig">\n'.format(label)
-                text += '<a href="{0}"><img width={1} src="{0}"></a>\n'.format(image_url,fig_width)
-
-                if self.arguments:
-                    text += rst2html(self.arguments[0])
-                text += '</div>\n'
+                
             else:
-                text += '<div class="warning">\n'
-                text += '<strong>File generation error:</strong><br><br>\n'
-                text += '<pre><code>\n'
-                text += '\n' + '\n'.join(self.content) + '\n'
-                text += '</code></pre>\n'
-                text += '</div>\n\n'
+                pass
+                
+        except:
+            pass
 
-        node = nodes.raw(text=text, format='html', **self.options)
-        node_list += [node]
-
-        return node_list
-
-    def build_fig(self, label=None, scale=1.00, type='latex'):
-
-    
-    
-        # Unlike a normal image, our reference will come from the content...
-        content = '\n'.join(self.content).replace('\\\\','\\')
-        image_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
-
-        image_name = '{}.png'.format(image_hash)
-        image_path = os.path.join(settings.MEDIA_ROOT, 'wiki', 'latex', image_name)
-        image_url = settings.MEDIA_URL + '/'.join(['wiki', 'latex', image_name])
-
-        self.options['uri'] = image_url
-
-        # Maybe we already made it? If not, make it now...
-        if not os.path.isfile(image_path):
-
-            print '* Making image {}'.format(image_name)
-            print '* Location: {}'.format(image_path)
-            print '* URL: {}'.format(image_url)
-
-            # Is the output folder even there?
-            d = os.path.dirname(image_path)
-            if not os.path.exists(d):
-                os.makedirs(d)
-
-            # Set up our folders and filename variables
-            curdir = os.getcwd()
-
-            # Write the LaTeX file to the image folder
-            os.chdir(config.latex_template_path, '_')
-            if os.path.isfile('temp.png'):
-                os.remove('temp.png')
-
-            f = codecs.open(os.path.join(config.latex_template_path, 'preview.tex'), 'r', 'utf-8')
-            preview_template = f.read()
-            f.close()
-
-            f = codecs.open('temp.tex', 'w', 'utf-8')
-            f.write(preview_template % content)
-            f.close()
-
-            # Run LaTeX ...
-            cmd = os.path.join(config.tex_path, 'pdflatex')
-            cmd = [cmd,
-            '--interaction=nonstopmode',
-            'temp.tex'
-            ]
-            p = Popen(cmd,stdout=PIPE,stderr=PIPE)
-            out, err = p.communicate()
-
-            cmd = [config.gs_command,
-            '-q',
-            '-dBATCH',
-            '-dNOPAUSE',
-            '-sDEVICE=png16m',
-            '-r600',
-            '-dTextAlphaBits=4',
-            '-dGraphicsAlphaBits=4',
-            '-sOutputFile=temp.png',
-            'temp.pdf',
-            ]
-            p = Popen(cmd,stdout=PIPE,stderr=PIPE)
-            out, err = p.communicate()
-
-            img = Image.open('temp.png')
-            img_scale = 0.40 * scale
-            img_width = int(img_scale * img.size[0])
-            img_height = int(img_scale * img.size[1])
-            img = img.resize((img_width, img_height), Image.ANTIALIAS)
-            img.save('temp.png', 'png')
-
-            # Finally, move the image file and clean up
-            if os.path.isfile('temp.png'):
-                shutil.copyfile('temp.png', image_path)
-
-            os.chdir(curdir)
-
-        self.options['alt'] = self.content
-
-        text = '\n\n'
-        if os.path.exists(image_path):
-            img_width, img_height = Image.open(image_path).size
-            fig_width = int(img_width*scale*0.50)
-
-            if 'label' in self.options.keys():
-                label = nodes.make_id(self.options['label'])
-            else:
-                label = nodes.make_id(image_name)
-
-            text += '<div id="fig:{0}" class="docutils-extensions fig">\n'.format(label)
-            text += '<a href="{0}"><img width={1} src="{0}"></a>\n'.format(image_url,fig_width)
-
-            if self.arguments:
-                text += rst2html(self.arguments[0])
-            text += '</div>\n'
-        else:
-            text += '<div class="warning">\n'
-            text += '<strong>File generation error:</strong><br><br>\n'
-            text += '<pre><code>\n'
-            text += '\n' + '\n'.join(self.content) + '\n'
-            text += '</code></pre>\n'
-            text += '</div>\n\n'
+        return image_path
         
 ## -------------------------------------------------------------------------- ##
-
-
 
 class plt_directive(rst.Directive):
 
