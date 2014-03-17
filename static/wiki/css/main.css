@@ -77,6 +77,7 @@ pre {
 .r { text-align: right; }
 
 .warning {
+    margin:1em 0;
     padding:1em;
     border:1px dotted red;
     background:#fee;
