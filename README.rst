@@ -8,7 +8,7 @@ My Django based wiki.
   - LaTeX for beautiful printing [WIP]
   - TikZ for beautiful drawing
   - MathJax for beautiful browsing
-  - Some Mathplotlib functionality too... [WIP]
+  - Some Mathplotlib functionality too...
   
 - Simple HTML/CSS structure with an eye to mobile
 - Unobtrusive full screen editor
