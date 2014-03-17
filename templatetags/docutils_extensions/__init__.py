@@ -5,6 +5,7 @@ import codecs
 import hashlib
 import os
 import posixpath
+import re
 import shutil
 import sys
 
@@ -22,6 +23,7 @@ from docutils.parsers import rst
 LATEX_PATH = settings.TEX_PATH
 GS_COMMAND = settings.GS_CMD
 PYTHON_CMD = settings.PYTHON_CMD
+FFMPEG_CMD = settings.FFMPEG_CMD
 
 # Directory within docutils_extensions to find working folders
 WORK_PATH = ''
@@ -656,11 +658,28 @@ class fig_directive(rst.Directive):
                 label = nodes.make_id(image_name)
 
             text += '<div id="fig:{0}" class="docutils-extensions fig">\n'.format(label)
-            
-            i = Image.open(image_path)
-            image_width = int(scale * i.size[0])
-            
-            text += '<a href="{0}"><img width="{1}px" src="{0}"></a>\n'.format(image_url, image_width)
+
+            text += '<a href="{0}">\n'.format(image_url)
+            try:
+                i = Image.open(image_path)
+                x = int(scale * i.size[0])
+                y = int(scale * i.size[1])
+                text += '<img width="{1}px" height="{2}"px src="{0}">\n'.format(image_url, x, y)
+            except:
+                ext = os.path.basename(image_path).rsplit('.')[1]
+                if ext == 'mp4':
+                    cmd = [FFMPEG_CMD, '-i', image_path]
+                    p = Popen(cmd,stdout=PIPE,stderr=PIPE)
+                    out, err = p.communicate()
+                    
+                    m = re.search(r'Stream.*Video.*, (\d+)x(\d+)', err)
+                    if m:
+                        x = int(scale * float(m.group(1)))
+                        y = int(scale * float(m.group(2)))
+                        text += '<video width="{1}px" height="{2}px" controls><source src="{0}" type="video/mp4"></video>\n'.format(image_url, x, y)
+                    else:
+                        text += '<video controls><source src="{0}" type="video/mp4"></video>\n'.format(image_url)
+            text += '</a>\n'            
 
             if self.arguments:
                 text += rst2html(self.arguments[0])
@@ -676,25 +695,26 @@ class fig_directive(rst.Directive):
         print '* Trying to build {}'.format(image_path)
 
         ext = os.path.basename(image_path).split('.')[1]
-        tempfile = '.'.join(['temp.', ext])
+        tempfile = '.'.join(['temp', ext])
         
         try:
             # Let's remember where we came from...
             curdir = os.getcwd()
-            newdir = os.path.join(WORK_PATH, type)
+            newdir = os.path.join(WORK_PATH, type, '_')
+            template_dir = os.path.normpath(os.path.join(newdir, '..'))
 
             # Move to proper working directory for this type of content
             os.chdir(newdir)
             print '* Moved to work directory at {}'.format(newdir)
             if os.path.isfile(tempfile):
                 os.remove(tempfile)
-
+                
             print '* Construction template = {}-{}'.format(type, template)
             if type == 'latex':
             
                 # Load template to memory
                 template += '.tex'
-                template_path = os.path.join(newdir, template)
+                template_path = os.path.join(template_dir, template)
                 f = codecs.open(template_path, 'r', 'utf-8')
                 template = f.read()
                 f.close()
@@ -707,10 +727,7 @@ class fig_directive(rst.Directive):
 
                 print '* Running LaTeX (temp.tex --> temp.pdf)'
                 cmd = os.path.join(LATEX_PATH, 'pdflatex')
-                cmd = [cmd,
-                '--interaction=nonstopmode',
-                'temp.tex'
-                ]
+                cmd = [cmd, '--interaction=nonstopmode', 'temp.tex']
                 p = Popen(cmd,stdout=PIPE,stderr=PIPE)
                 out, err = p.communicate()
 
@@ -739,7 +756,7 @@ class fig_directive(rst.Directive):
                     
                 # Load template to memory
                 template += '.py'
-                template_path = os.path.join(newdir, template)
+                template_path = os.path.join(template_dir, template)
                 f = codecs.open(template_path, 'r', 'utf-8')
                 template = f.read()
                 f.close()
@@ -765,11 +782,11 @@ class fig_directive(rst.Directive):
             if type: # then capture the file we just built            
 
                 if ext == 'png':
-                    print '* Resizing temp.png'
+                    print '* Resizing {}'.format(tempfile)
                     img = Image.open(tempfile)
-                    img_width = int(img_scale * img.size[0])
-                    img_height = int(img_scale * img.size[1])
-                    img = img.resize((img_width, img_height), Image.ANTIALIAS)
+                    x = int(img_scale * img.size[0])
+                    y = int(img_scale * img.size[1])
+                    img = img.resize((x, y), Image.ANTIALIAS)
                     img.save(tempfile, 'png')
 
                 # Is the output folder even there?
@@ -780,6 +797,7 @@ class fig_directive(rst.Directive):
                 # Finally, move the image file and clean up
                 if os.path.exists(tempfile):
                     shutil.copyfile(tempfile, image_path)
+                    os.remove(tempfile)
 
                 print '* New file saved at {}'.format(image_path)
                 os.chdir(curdir)
