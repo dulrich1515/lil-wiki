@@ -5,25 +5,13 @@
 \begin{document}
 \begin{preview}
 \begin{tikzpicture}
-\begin{axis}[
-    grid=major,
-    xlabel=Angle (deg),
-    xtick={0,10,...,90},
-    ylabel=Range (cm),
-    ytick={0,10,...,60}
-]
-\addplot[draw=none,mark=*] coordinates {
-    (0,0)
-    (90,0)
-};
-\addplot[draw=none,mark=*,error bars/.cd,y dir=both,y explicit] coordinates {
-    (14,28) +- (0,3)
-    (29,47) +- (0,5)
-    (45,58) +- (0,7)
-    (58,51) +- (0,4)
-    (78,25) +- (0,5)
-};
-\end{axis}
+\node (v) [vertex] at (0,0);
+\coordinate (1) at ($(v)+(180:1)$);
+\coordinate (2) at ($(v)+(300:1)$);
+\coordinate (3) at ($(v)+(60:1)$);
+\draw [dashed] (v) -- (1) node [below] {$\phi$};
+\draw [->-] (2) node [right=1mm] {$\psi$} -- (v);
+\draw [->-] (v) -- (3) node [right=1mm] {$\psi$};
 \end{tikzpicture}
 \end{preview}
 \end{document}

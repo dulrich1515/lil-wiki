@@ -611,14 +611,19 @@ class fig_directive(rst.Directive):
 
         if 'image' in self.options:
             image_name = self.options['image']
-            image_path = os.path.join(settings.MEDIA_ROOT, WIKI_IMAGE_FOLDER, image_name)
-            image_url = settings.MEDIA_URL + '/'.join([WIKI_IMAGE_FOLDER, image_name])
+            
+            if '://' in image_name:
+                image_path = ''
+                image_url = image_name
+            else:
+                image_path = os.path.join(settings.MEDIA_ROOT, WIKI_IMAGE_FOLDER, image_name)
+                image_url = settings.MEDIA_URL + '/'.join([WIKI_IMAGE_FOLDER, image_name])
 
-            if not os.path.exists(image_path):
-                print '* ERROR: Missing: ' + image_path
-                text += '<p class="warning">'
-                text += 'Missing image : {}'.format(image_name)
-                text += '</p>\n'.format(image_name)
+                if not os.path.exists(image_path):
+                    print '* ERROR: Missing: ' + image_path
+                    text += '<p class="warning">'
+                    text += 'Missing image : {}'.format(image_name)
+                    text += '</p>\n'.format(image_name)
         else:
             # Unlike a normal image, our reference will come from the content...
             self.assert_has_content()
@@ -661,10 +666,13 @@ class fig_directive(rst.Directive):
 
             text += '<a href="{0}">\n'.format(image_url)
             try:
-                i = Image.open(image_path)
-                x = int(scale * i.size[0])
-                y = int(scale * i.size[1])
-                text += '<img width="{1}px" height="{2}"px src="{0}">\n'.format(image_url, x, y)
+                if image_path:
+                    i = Image.open(image_path)
+                    x = int(scale * i.size[0])
+                    y = int(scale * i.size[1])
+                    text += '<img width="{1}px" height="{2}"px src="{0}">\n'.format(image_url, x, y)
+                else:
+                    text += '<img src="{0}">\n'.format(image_url)
             except:
                 ext = os.path.basename(image_path).rsplit('.')[1]
                 if ext == 'mp4':

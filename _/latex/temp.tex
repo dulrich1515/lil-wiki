@@ -1,0 +1,24 @@
+\documentclass{article}
+\pagestyle{empty}
+\usepackage[active,tightpage]{preview}
+\usepackage{p200}
+\begin{document}
+\begin{preview}
+\begin{tikzpicture}
+\tikzstyle {forcearrow2} = [forcearrow,fill opacity=1,fill=black!25]
+\draw (1,-2) -- (1,2);
+\draw (0,0) circle (1);
+\draw [dashed] (240:2) -- (0,0) node [pos=0,below right] {$v$};
+\draw [dashed,->] (0,0) -- (150:2) node [pos=1,above right] {$u$};
+\draw [->] (180:0.5) arc (180:-90:0.5);
+\node at (45:0.5) [fill=white] {$\omega$};
+\node at (1.2,0) [forcearrow2,left,rotate=180] {};
+\node at (1.7,0) [right] {$N$};
+\node at (1,-0.2) [forcearrow2,right,rotate=270] {};
+\node at (1,-0.6) [below right] {$F = \mu_s N$};
+\fill (1,0) circle (0.05);
+\draw [->] (-2.2,-1.2) -- +(0.5,0) node [right] {$x$};
+\draw [->] (-2.2,-1.2) -- +(0,0.5) node [above] {$y$};
+\end{tikzpicture}
+\end{preview}
+\end{document}
