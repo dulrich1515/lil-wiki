@@ -1,13 +1,3 @@
-"""
-Matplotlib Animation Example
-
-author: Jake Vanderplas
-email: vanderplas@astro.washington.edu
-website: http://jakevdp.github.com
-license: BSD
-Please feel free to use and modify this, but keep the above information. Thanks!
-"""
-
 from __future__ import division
 
 import numpy as np

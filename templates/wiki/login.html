@@ -1,5 +1,11 @@
 {% extends "wiki/base.html" %}
 
+{% block extra-style %}
+body {
+    background:#f9f4d6 url({{ STATIC_URL }}background.jpg) center top no-repeat;
+}
+{% endblock %}
+
 {% block main-content %}
 <h1 id="title">Login</h1>
 <div id="content">
