@@ -72,6 +72,10 @@ pre {
     font-family:monospace;
     overflow:auto;
 }
+button[type="submit"] {
+    padding:0.5em 1em;
+}
+
 .l { text-align: left; }
 .c { text-align: center; }
 .r { text-align: right; }
@@ -86,6 +90,21 @@ pre {
     margin:0;
     color:red;
 }
+
+.form-list {
+    line-height:1.5em;
+}
+.form-list dt {
+    margin:1em 0 0 0;
+}
+.form-list dd {
+    margin:0 0 1em 0;
+}
+.form-list dd input {
+    line-hei ght:1.5em;
+    padding:0.5em;
+}
+
 /**************/
 /* Containers */
 /**************/
@@ -106,42 +125,41 @@ pre {
     background:#fff;
 }
 #controls {
-    padding:0.5em;
+    padding:0;
     position:fixed;
     top:0;
     right:0;
     line-height:2em;
     background:#e6eefe;
-    border-left:1px solid #fff;
-    border-bottom:1px solid #fff;
-    text-align:right;
+    border-left:1px solid #ccc;
+    border-bottom:1px solid #ccc;
+    text-align:center;
 }
 #controls h2 {
-    display:none;
+    margin:0;
+    padding:0 0.45em;
+    border:1px solid transparent;
+    color:#aaa;
+    display:block;
+    font-size:1.2em;
+    font-weight:normal;
+    cursor:pointer;
 }
 #controls ul {
     padding:0;
     margin:0;
     list-style:none;
 }
-#controls:hover ul {
-    display:block !important;
-}
 #controls li {
     padding:0;
     margin:0;
+    border-top:1px solid #ccc;
 }
 #controls a {
-    padding:0 1em;
+    padding:0.5em 1em;
     margin:0;
     border:1px solid transparent;
     display:block;
-}
-#controls a:hover {
-    border-left:1px solid #fff;
-    border-top:1px solid #fff;
-    border-right:1px solid #aaa;
-    border-bottom:1px solid #aaa;
     text-decoration:none;
 }
 #footer {
@@ -149,15 +167,59 @@ pre {
     text-align:center;
 }
 
+.related-pages ul {
+    list-style:none;
+    padding-left:0;
+    margin:0;
+    display:inline-block;
+}
+.related-pages a,
+.related-pages span {
+    padding:0.5em;
+    margin-bottom:3px;
+    display:block;
+}
+.related-pages a {
+    border:1px solid blue;
+}
+.related-pages span {
+    border:1px dashed black;
+}
+
+.parent-link {
+    padding:0.5em;
+    border:1px solid blue;
+    display:inline-block;
+}
+
+.related-pages a:hover,
+.parent-link:hover {
+    text-decoration:none;
+    background:white;
+}
+
+table.series-links {
+    border-spacing:0;
+    border:none;
+}
+table.series-links td {
+    background:transparent;
+    border:none;
+    padding:0;
+}
+
+
 /******************/
 /* Docutils stuff */
 /******************/
 
 .docutils.footnote {
     width:100%;
+    margin-bottom:1em;
 }
 .docutils.footnote td {
     vertical-align:middle !important;
+    text-align:left;
 }
 .docutils.literal {
     border:1px solid #ccc;
@@ -171,6 +233,7 @@ pre {
 }
 .admonition {
     padding:0 1em;
+    margin:1em 0;
     border:1px solid #ccc;
     background:#eee;
     /* background-image:url(../img/ast.png); */
@@ -239,6 +302,7 @@ pre {
 .docutils-extensions video
  {
     max-width:100%;
+    vertical-align:bottom;
     height:auto;
     -ms-interpolation-mode: bicubic;
 }

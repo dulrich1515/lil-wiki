@@ -21,12 +21,7 @@ $(document).keydown(function(e) {
 <h1 id="title">WikiRoot</h1>
 <div id="content">
     <ul>
-        {% for page in root.children.dirs %}
-        <li>» <a href="{% url wiki_show page %}">{{ page }}</a></li>
-        {% endfor %}
-    </ul>
-    <ul>
-        {% for page in root.children.files %}
+        {% for page in root.children %}
         <li><a href="{% url wiki_show page %}">{{ page }}</a></li>
         {% endfor %}
     </ul>

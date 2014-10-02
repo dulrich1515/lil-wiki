@@ -1,4 +1,4 @@
-﻿from django.db.models import *
+from django.db.models import *
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
@@ -7,6 +7,7 @@ import os
 import re
 
 from config import wiki_pages_path
+from config import wiki_image_path
 
 class Page(object):
     def __init__(self, pg):
@@ -17,7 +18,6 @@ class Page(object):
         else:
             self.title = 'WikiRoot'
         self.title2 = self.title.replace('_', ' ')
-
 
     @property
     def exists(self):
@@ -52,15 +52,17 @@ class Page(object):
         repl = r'`\1 <</{}/\1>>`_'.format(self.pg)
         content = re.sub(pattern, repl, content)
 
-        # 1b. Prepend parent to named sibling wiki-links
-        pattern = r'`(.*) <<\.\/([\-\w]+)>>`_'
-        repl = r'`\1 <</{}/\2>>`_'.format(self.parent.pg)
-        content = re.sub(pattern, repl, content)
+        if self.parent: # wiki_root has no parent...
 
-        # 2b. Prepend parent to remaining sibling wiki-links
-        pattern = r'<<\.\/([\-\w]+)>>'
-        repl = r'`\1 <</{}/\1>>`_'.format(self.parent.pg)
-        content = re.sub(pattern, repl, content)
+            # 1b. Prepend parent to named sibling wiki-links
+            pattern = r'`(.*) <<\.\/([\-\w]+)>>`_'
+            repl = r'`\1 <</{}/\2>>`_'.format(self.parent.pg)
+            content = re.sub(pattern, repl, content)
+
+            # 2b. Prepend parent to remaining sibling wiki-links
+            pattern = r'<<\.\/([\-\w]+)>>'
+            repl = r'`\1 <</{}/\1>>`_'.format(self.parent.pg)
+            content = re.sub(pattern, repl, content)
 
         # 3. Expand lone wiki-links (must start with slash)
         pattern = r'<</([\-\w\/]+)>>([^`])' # looking for back-tick to avoid converting the named links twice...
@@ -75,15 +77,25 @@ class Page(object):
         if content:
             if toc:
                 content = '.. contents:: Table of contents\n\n' + content
+
+        # Prepend image directory for docutils_extensions
+
+        pattern = r'\\includegraphics(.*){(.*)}'
+        repl = r'\\includegraphics\1{{{0}/\2}}'.format(wiki_image_path)
+        content = re.sub(pattern, repl, content)
+
         return content
 
     @property
     def parent(self):
-        dirs = self.pg.split('/')[:-1]
-        parent = Page('/'.join(dirs))
+        if self.pg:
+            dirs = self.pg.split('/')[:-1]
+            parent = Page('/'.join(dirs))
+        else:
+            parent = None
         return parent
 
-    def get_subpages(self, page, remove=[]):
+    def get_subpages(self, page, as_list=False, remove=[]):
         subpages = {'dirs': [], 'files': []}
 
         if os.path.isdir(page.fp):
@@ -100,28 +112,28 @@ class Page(object):
                     subpages['files'].append(Page(pg))
                 break
 
-        for pg in [x.pg for x in remove]:
-            for page in subpages['dirs']:
-                if page.pg == pg:
-                    subpages['dirs'].remove(page)
-                    break
-            for page in subpages['files']:
-                if page.pg == pg:
-                    subpages['files'].remove(page)
-                    break
+        for page in subpages['files']:
+            if page.pg in [p.pg for p in remove]:
+                subpages['files'].remove(page)
+        for page in subpages['dirs']:
+            if page.pg in [p.pg for p in remove]:
+                subpages['dirs'].remove(page)
 
         if not subpages['dirs'] and not subpages['files']:
-            subpages = {}
+            subpages = None
+        
+        if subpages and as_list:
+            subpages = sorted(subpages['dirs'] + subpages['files'], key=lambda page: page.pg)
 
         return subpages
 
     @property
     def children(self):
-        return self.get_subpages(self)
+        return self.get_subpages(self, as_list=True)
 
     @property
     def siblings(self):
-        siblings = self.get_subpages(self.parent, remove=[self])
+        siblings = self.get_subpages(self.parent, as_list=True, remove=[self])
         return siblings
 
     @property
@@ -129,7 +141,7 @@ class Page(object):
         series = []
         m = re.match('([\w\/]*)_(\d\d\d)$', self.pg)
         if m: # this page is part of a series
-            for s in self.get_subpages(self.parent)['files']:
+            for s in self.get_subpages(self.parent, as_list=True):
                 m1 = re.match('([\w\/]*)_(\d\d\d)$', s.pg)
                 if m1:
                     print m1.group(1)

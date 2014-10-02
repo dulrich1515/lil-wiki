@@ -12,7 +12,7 @@
 
 % do i really need all of these?
 
-%% \usepackage{ifthen}
+\usepackage{ifthen} % used in "periodic table" tikz macros
 \usepackage{makeidx}
 %% \usepackage{verbatim}
 %% \usepackage{array}
@@ -28,11 +28,10 @@
 \usepackage{textcomp}
 
 \usepackage{mparhack}
-\usepackage[strict]{changepage} % ???
+\usepackage[strict]{changepage} % used to adjust margins
 \usepackage{caption}
 
 \usepackage{pgfplots}
-\usepackage{slashed}
 
 
 
@@ -103,20 +102,17 @@
 }
 
 
-
-% could just use braket package...
-
-
-\newcommand{\bra}[1]{\langle #1 \vert}
-\newcommand{\ket}[1]{\vert #1 \rangle}
-\newcommand{\braket}[2]{\langle #1 \vert #2 \rangle}
-
-\newcommand{\Bra}[1]{\bigg \langle #1 \bigg \vert}
-\newcommand{\Ket}[1]{\bigg \vert #1 \bigg \rangle}
-\newcommand{\Braket}[2]{\bigg \langle #1 \bigg \vert #2 \bigg \rangle}
+%% http://tex.stackexchange.com/questions/41787/use-textwidth-for-image-width-only-when-it-outgrows-the-page
+\usepackage{graphicx}
+\newsavebox\IBox
+\let\Includegrfx\includegraphics
+\renewcommand\includegraphics[2][]{%
+  \sbox\IBox{\Includegrfx[#1]{#2}}%
+  \ifdim\wd\IBox>\textwidth\resizebox{\textwidth}{!}{\usebox\IBox}\else\usebox\IBox\fi%
+}
 
 
-
+ 
 
 %%%%%%%%%%%%%%%%%%%%%
 %% MATH FORMATTING %%
@@ -136,10 +132,9 @@
 \newcommand{\dg}{^\circ}
 \newcommand{\ohm}{\Omega}
 \newcommand{\sci}[2]{#1 \times 10^{#2}}
-\newcommand{\abs}[1]{\left \vert #1 \vert \right}
-%\newcommand{\avg}[1]{#1_\text{avg}}
-\newcommand{\avg}[1]{\langle #1 \rangle}
-\newcommand{\Avg}[1]{\left \langle #1 \right \rangle}
+%%\newcommand{\avg}[1]{\langle #1 \rangle}
+\newcommand{\avg}[1]{#1_\text{avg}}
+
 \newcommand{\vmag}[1]{\text{mag} \; \vect{#1}}
 \newcommand{\vang}[1]{\text{ang} \; \vect{#1}}
 
@@ -152,13 +147,6 @@
 %\DeclareMathOperator{\vdiv}{div}
 %\DeclareMathOperator{\curl}{curl}
 
-\newcommand{\D}{\mathcal{D}} % covariant derivative
-\newcommand{\M}{\mathcal{M}} % amplitude (qft)
-\newcommand{\A}{\mathcal{A}} % amplitude (qft)
-% Polish L with stroke is already defined by LaTeX as \L...
-\renewcommand{\L}{\mathcal{L}} % lagrangian field density
-% Not sure what \d is defined as, to be honest... so I may regret this one
-\renewcommand{\d}{\; d}
 
 %% The following just because I prefer the math font...
 
@@ -169,7 +157,6 @@
 \DeclareUnicodeCharacter{00B3}{$^3$}
 \DeclareUnicodeCharacter{00B5}{$\mu$}
 \DeclareUnicodeCharacter{00B7}{$\times$}
-\DeclareUnicodeCharacter{00BD}{$\half$}
 \DeclareUnicodeCharacter{03A9}{$\ohm$}
 \DeclareUnicodeCharacter{2126}{$\ohm$} % did you know there was an `ohm' unicode character?
 \DeclareUnicodeCharacter{00F7}{$\div$}
@@ -198,23 +185,24 @@
 \usetikzlibrary{shapes} % Required to use the keyword `ellipse', for example.
 \usetikzlibrary{positioning} % Used to position nodes.
 \usetikzlibrary{calc} % Used to calculate linear combinations of coordinates.
-%\usetikzlibrary{snakes} % Used for snake decorations.
+\usetikzlibrary{snakes} % Used for snake decorations.
 \usetikzlibrary{backgrounds} % Used to get the background outline.
+\usetikzlibrary{patterns} % Used for pattern backgrounds
 \usetikzlibrary{through} % Used for geometric calculations.
 \usetikzlibrary{decorations.pathmorphing} % For coils, etc...
 \usetikzlibrary{decorations.markings} % For arrow-heads within the line.
 \usetikzlibrary{decorations.pathreplacing} % For braces.
 \usetikzlibrary{decorations.text} % For text-along-path.
 
-
-
 \tikzstyle {every picture}+=[remember picture] % For picture-to-picture paths.
 \tikzstyle {every picture} = [>=latex]
 \tikzstyle {every pin} = [fill=white]
+\tikzstyle {baseline} = [text depth=0.25ex,text height=1.75ex]
 
 % mechanics
 
 \tikzstyle {forcearrow} = [draw,fill=black,fill opacity=0.25,single arrow,shape border uses incircle,scale=0.5,minimum height=1cm]
+\tikzstyle {pointer} = [draw,fill=white,single arrow,minimum height=1.25cm,minimum width=0.75cm,single arrow head extend=0.5mm]
 
 % electronics
 
@@ -232,101 +220,14 @@
 \tikzstyle {actual} = [fill,circle,inner sep=0.5mm]
 \tikzstyle {virtual} = [actual,fill=white,draw]
 \tikzstyle {electron} = []
-% previous I'm going to deprecate, but will keep for compatability...
-\tikzset{
-    scalar/.style={dashed},
-    photon/.style={draw opacity=0,
-        postaction={decorate},
-        postaction={draw,draw opacity=1,decoration={snake,segment length=2mm,amplitude=0.5mm},decorate}
-    },
-    gluon/.style={draw opacity=0,
-        postaction={decorate},
-        postaction={draw,draw opacity=1,decoration={coil,aspect=1,segment length=1mm,amplitude=0.5mm},decorate}
-    },
-    weak/.style={draw opacity=0,
-        postaction={decorate},
-        postaction={draw,draw opacity=1,decoration={zigzag,segment length=1mm,amplitude=0.5mm},decorate}
-    },
-    ->-/.style={
-        decoration={markings,mark=at position .50 with {
-            \arrow[xshift=2pt,draw opacity=1]{>};
-        }},
-        postaction={decorate}
-    },
-    -<-/.style={
-        decoration={markings,mark=at position .50 with {
-            \arrow[xshift=2pt,draw opacity=1]{<};
-        }},
-        postaction={decorate}
-    },
-% sometimes that latex arrow in the middle is hard to see on those boson lines...
-    -|>-/.style={
-        decoration={markings,mark=at position .50 with {
-            \arrow[xshift=3pt,>=triangle 45,draw opacity=1]{>};
-        }},
-        postaction={decorate}
-    },
-    -<|-/.style={
-        decoration={markings,mark=at position .50 with {
-            \arrow[xshift=3pt,>=triangle 45,draw opacity=1]{<};
-        }},
-        postaction={decorate}
-    },
-% an open arrow option (less used <--> more verbose)...
-    -|o>-/.style={ 
-        decoration={markings,mark=at position .50 with {
-            \arrow[xshift=3pt,>=triangle 45,draw opacity=1,white]{>};
-            \arrow[xshift=3pt,>=open triangle 45,draw opacity=1]{>};
-        }},
-        postaction={decorate}
-    },
-    -<o|-/.style={
-        decoration={markings,mark=at position .50 with {
-            \arrow[xshift=3pt,>=triangle 45,draw opacity=1,white]{<};
-            \arrow[xshift=3pt,>=open triangle 45,draw opacity=1]{<};
-        }},
-        postaction={decorate}
-    },
-% double arrows ??? filled = particle/anti-particle; open = flow of momentum
-    ->|o>-/.style={ 
-        decoration={markings,mark=at position .50 with {
-            \arrow[xshift=4pt,>=triangle 45,draw opacity=1,white]{>};
-            \arrow[xshift=4pt,>=open triangle 45,draw opacity=1]{>};
-            \arrow[>=triangle 45,draw opacity=1]{>};
-        }},
-        postaction={decorate}
-    },
-    -<o|<-/.style={
-        decoration={markings,mark=at position .50 with {
-            \arrow[>=open triangle 45,draw opacity=1]{<};
-            \arrow[xshift=4pt,>=triangle 45,draw opacity=1]{<};
-            \arrow[>=triangle 45,draw opacity=1,white]{<};
-        }},
-        postaction={decorate}
-    },
-    -<|o>-/.style={ 
-        decoration={markings,mark=at position .50 with {
-            \arrow[>=triangle 45,draw opacity=1]{<};
-            \arrow[xshift=6pt,>=triangle 45,draw opacity=1,white]{>};
-            \arrow[xshift=6pt,>=open triangle 45,draw opacity=1]{>};
-        }},
-        postaction={decorate}
-    },
-    -<o|>-/.style={
-        decoration={markings,mark=at position .50 with {
-            \arrow[>=triangle 45,draw opacity=1,white]{<};
-            \arrow[>=open triangle 45,draw opacity=1]{<};
-            \arrow[xshift=6pt,>=triangle 45,draw opacity=1]{>};
-        }},
-        postaction={decorate}
-    },
-    vertex/.style={fill,circle,inner sep=0.5mm},
-    actual/.style={draw,ultra thick,cross out,inner sep=0.5mm}
-}
-
+\tikzstyle {photon} = [decorate,decoration={snake,segment length=2mm,amplitude=0.5mm}]
+\tikzstyle {gluon} = [decorate,decoration={coil,aspect=1,segment length=2mm,amplitude=0.75mm}]
+\tikzstyle {weak} = [decorate,decoration={zigzag,segment length=2mm,amplitude=0.75mm}]
+\tikzstyle {scalar} = [dashed]
+\tikzstyle {->-} = [postaction={decorate},decoration={markings,mark=at position .50 with {\arrow[xshift=3pt]{>}}}]
+\tikzstyle {-<-} = [postaction={decorate},decoration={markings,mark=at position .50 with {\arrow[xshift=-3pt]{<}}}]
 
 % for drawing tables (periodic chart)
-
 \tikzstyle {nix} = [minimum size=12mm,inner sep=0mm]
 \tikzstyle {box} = [nix,draw,ultra thin]
 \newcommand{\ep}[3]
@@ -372,7 +273,7 @@
     \pgf@x=0.5\pgf@x
   }
   \nodeparts{}
-  \inheritsavedanchors[from=circle]
+  \inheritsavedanchors[from=circle] 
   \inheritanchorborder[from=circle]
   \inheritanchor[from=circle]{center}
   \backgroundpath{
@@ -391,14 +292,32 @@
     \fi
     \ifpgf@pointing@out
       \pgfpathcircle{\centerpoint}{1pt}
-      \pgfsetfillcolor{black}
-      \pgfusepath{fill}
+      \pgfusepath{draw}
     \fi  }
 }
 
 \makeatother
 
 %% end inout node %%
+
+
+%% from http://tex.stackexchange.com/questions/45347/vertical-and-horizontal-lines-in-pgf-tikz#110172
+\tikzset{
+  -|-/.style={
+    to path={
+      (\tikztostart) -| ($(\tikztostart)!#1!(\tikztotarget)$) |- (\tikztotarget)
+      \tikztonodes
+    }
+  },
+  -|-/.default=0.5,
+  |-|/.style={
+    to path={
+      (\tikztostart) |- ($(\tikztostart)!#1!(\tikztotarget)$) -| (\tikztotarget)
+      \tikztonodes
+    }
+  },
+  |-|/.default=0.5,
+}
 
 
 
@@ -419,17 +338,20 @@
     \csname DUadmonition#1\endcsname{#2}%%
   \else
     \begin{center}
-      \fbox{\parbox{0.9\textwidth}{%%
+      \fbox{\parbox{1.0\textwidth}{%%
         \centering%%
-        \begin{minipage}{0.87\textwidth}
-        \vspace{0.5ex}
+        \begin{minipage}{0.97\textwidth}
+        \setlength\parskip{0.1in}
         #2
-        \vspace{0.5ex}
+        \vspace{1.5ex}
         \end{minipage}%%
         }}
     \end{center}
   \fi
 }
+
+%% sidebar --- make similar to admonition
+\providecommand{\DUsidebar}[1]{\DUadmonition{#1}}%%
 
 %% title for topics, admonitions and sidebar
 \providecommand*{\DUtitle}[2][class-arg]{%%
@@ -437,9 +359,13 @@
   \ifcsname DUtitle#1\endcsname%%
     \csname DUtitle#1\endcsname{#2}%%
   \else
-    \smallskip\noindent\textbf{#2}\smallskip%%
+    \ifx\\#2\\%%
+    \else%%
+      \smallskip\noindent\textbf{#2}\smallskip%%
+    \fi
   \fi
 }
+
 
 %% numeric or symbol footnotes with hyperlinks
 \providecommand*{\DUfootnotemark}[3]{%%
@@ -454,6 +380,7 @@
   \footnotetext{#4}%%
   \endgroup%%
 }
+
 
 %% inline markup (custom roles)
 %% \DUrole{#1}{#2} tries \DUrole#1{#2}

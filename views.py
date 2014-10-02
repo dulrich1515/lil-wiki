@@ -33,8 +33,8 @@ def list_by_name(request):
 
 
 def show(request, pg=''):
-    if not pg:
-        return list_by_name(request)
+#    if not pg:
+#        return list_by_name(request)
     if pg[:1] == '/':
         return redirect('wiki_show', pg[:1])
 

@@ -57,4 +57,17 @@ $(document).ready(function() {
     });
 });
 
+$(document).ready(function($) {
+    var upChar = '\u25b3';
+    var dnChar = '\u25bd';
+
+    $('#controls ul').toggle();
+    $('#controls h2').text(dnChar);
+    $('#controls h2').on('click', function() {
+        $('#controls ul').toggle();
+        $(this).toggleClass('active');
+        nwChar = ( $(this).text() == dnChar ) ? upChar : dnChar;
+        $(this).text(nwChar)
+    });
+});
 

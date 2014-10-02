@@ -33,74 +33,75 @@ $(document).keydown(function(e) {
 {% block main-content %}
 <div{% if user.is_staff %} ondblclick="location.href='{% url wiki_edit page %}';"{% endif %}>
     <h1 id="title">{{ page.title }}</h1>
-    <div id="content">
+
     {% if page.parent %}
-    <p>Up to: <a href="{% url wiki_show page.parent %}">{{ page.parent.title }}</a></p>
+    <p>Up to: <a class="parent-link" href="{% url wiki_show page.parent %}">{{ page.parent.title }}</a></p>
     {% endif %}
-    {% if page.content %}
+
+    {% if page.content %} 
+    <div id="content">
     {{ page.content|rst2html }}
-    {% else %}
-    {% if page.children.dirs %}
-    <ul>
-        {% for page in page.children.dirs %}
-        <li>» <a href="{% url wiki_show page %}">{{ page.title }}</a></li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% if page.children.files %}
-    <ul>
-        {% for page in page.children.files %}
-        <li><a href="{% url wiki_show page %}">{{ page.title }}</a></li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endif %}
     </div>
+    {% endif %}
 </div>
 
-{% if page.content %}
-{% if page.children or page.series %}
-<div id="related-pages" class="noprint">
-    <h2>Related Pages</h2>
-
+{% if page.children or page.series or page.siblings %}
+<div class="related-pages noprint">
     {% if page.children %}
     <p>Down to&hellip;</p>
-    {% if page.children.dirs %}
     <ul>
-        {% for page in page.children.dirs %}
-        <li>» <a href="{% url wiki_show page %}">{{ page.title }}</a></li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% if page.children.files %}
-    <ul>
-        {% for page in page.children.files %}
+        {% for page in page.children %}
         <li><a href="{% url wiki_show page %}">{{ page.title }}</a></li>
         {% endfor %}
     </ul>
-    {% endif %}
     {% endif %}
 
     {% if page.series %}
     <p>In this series&hellip;</p>
+    <table class="series-links">
+        {% for series_page in page.series %}
+        {% if series_page.pg == page.pg %}
+        <tr>
+            <td><span>{{ series_page.title }}</span></td>
+            <td>&nbsp; &larr; You are here</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td><a href="{% url wiki_show series_page %}">{{ series_page.title }}</a></td>
+            <td></td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </table>
+    {% comment %}
+    <p>In this series&hellip;</p>
     <ul>
         {% for series_page in page.series %}
         {% if series_page.pg == page.pg %}
-        <li>{{ series_page.title }} ◂ (you are here)</li>
+        <li><span>{{ series_page.title }}</span></li>
         {% else %}
         <li><a href="{% url wiki_show series_page %}">{{ series_page.title }}</a></li>
         {% endif %}
         {% endfor %}
     </ul>
+    {% endcomment %}
+    {% endif %}
+
+    {% if not page.children and not page.series and page.siblings %}
+    <p>Related pages</p>
+    <ul>
+        {% for sibling_page in page.siblings %}
+        <li><a href="{% url wiki_show sibling_page %}">{{ sibling_page.title }}</a></li>
+        {% endfor %}
+    </ul>
     {% endif %}
 
 </div>
 {% endif %}
-{% endif %}
 
 <div id="controls" class="noprint">
     <h2>Page Controls</h2>
-    <ul id="control_list">
+    <ul id="control-list">
         {% if user.is_authenticated %}
         <li><a href="{% url wiki_logout %}?next={% url wiki_show page %}">Logout</a></li>
         {% else %}

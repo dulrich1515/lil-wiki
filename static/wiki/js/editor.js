@@ -5,18 +5,18 @@ $(document).keydown(function(e) {
     if ( keycode == 27 ) // escape
     {
         e.preventDefault();
-        var elem = document.getElementById("controls").style;
+        var elem = document.getElementById("editor-controls").style;
         // elem.display = ( elem.display != 'none' ) ? 'none' : 'block';
-        elem.width = ( elem.width != '9em' ) ? '9em' : '5em';
+        elem.width = ( elem.width != '10em' ) ? '10em' : '6em';
         $('#content').focus();
     }
     if ( e.ctrlKey && key == 's' )
     {
         e.preventDefault();
-        var elem = document.getElementById("controls").style;
+        var elem = document.getElementById("editor-controls").style;
         // elem.display = 'block';
-        elem.width = '9em';
-        $('#submit').focus();
+        elem.width = '10em';
+        $('button[name="submit"]').focus();
     }
 });
 $('textarea').live('keydown', function(e){

@@ -22,35 +22,36 @@ body {
     top:40px;
     bottom:0px;
 }
-#controls h2 {
+#editor-controls h2 {
     display:none;
 }
-#controls ul{
+#editor-controls ul {
     position:absolute;
     top:40px;
     right:0;
     padding:0.2em;
     margin:0;
     list-style:none;
-    width:5em;
+    width:5.2em;
     text-align:right;
     overflow-x:scroll;
     transition:width 100ms;
     -webkit-transition:width 100ms; /* Safari */
 }
-#controls ul:hover {
-    width:9em !important;
+#editor-controls ul:hover {
+    width:10em !important;
 }
-#controls ul::-webkit-scrollbar { 
+#editor-controls ul::-webkit-scrollbar { 
     display: none; 
 }    
-#controls li{
+#editor-controls li {
     display:block;
-    width:9em;
+    width:10em;
     padding-right:0.2em;
 }
-#controls input {
-    width:5em;
+#editor-controls button { 
+    width:6em;
+    padding:0.5em 1em;
 }
 
 

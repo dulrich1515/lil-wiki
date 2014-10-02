@@ -1,11 +1,5 @@
 {% extends "wiki/base.html" %}
 
-{% block extra-style %}
-body {
-    background:#f9f4d6 url({{ STATIC_URL }}background.jpg) center top no-repeat;
-}
-{% endblock %}
-
 {% block main-content %}
 <h1 id="title">Login</h1>
 <div id="content">
@@ -16,14 +10,14 @@ body {
 
     <form method="post" action="{% url django.contrib.auth.views.login %}">
 
-    <dl>
+    <dl class="form-list">
         <dt>{{ form.username.label_tag }}</dt>
         <dd>{{ form.username }}</dd>
         <dt>{{ form.password.label_tag }}</dt>
         <dd>{{ form.password }}</dd>
     </dl>
     <p>
-        <input type="submit" value="Submit">
+        <button type="submit">Submit</button>
     </p>
 
     <input type="hidden" name="next" value="{{ next }}" />
@@ -36,6 +30,7 @@ body {
     <h2>Page Controls</h2>
     <ul id="control_list">
         <li><a href="{{ next }}">Cancel</a></li>
+        <li><a href="{% url wiki_root %}">WikiRoot</a></li>
     </ul>
 </div>
 
