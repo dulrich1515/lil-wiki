@@ -131,7 +131,8 @@ button[type="submit"] {
     right:0;
     line-height:2em;
     background:white;
-    border:2px solid #e6eefe;
+    border:3px solid #e6eefe;
+    border-left:3px solid #e6eefe;
     text-align:center;
 }
 #controls h2 {
@@ -153,10 +154,10 @@ button[type="submit"] {
 #controls li {
     padding:0;
     margin:0;
-    border-top:2px solid #e6eefe;
+    border-top:3px solid #e6eefe;
 }
 #controls a {
-    padding:0.5em 1em;
+    padding:0.25em 0.5em;
     margin:0;
     border:1px solid transparent;
     display:block;
