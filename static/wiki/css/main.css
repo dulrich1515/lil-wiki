@@ -130,16 +130,14 @@ button[type="submit"] {
     top:0;
     right:0;
     line-height:2em;
-    background:#e6eefe;
-    border-left:1px solid #ccc;
-    border-bottom:1px solid #ccc;
+    background:white;
     text-align:center;
 }
 #controls h2 {
     margin:0;
     padding:0 0.45em;
     border:1px solid transparent;
-    color:#aaa;
+    color:blue;
     display:block;
     font-size:1.2em;
     font-weight:normal;
@@ -153,7 +151,7 @@ button[type="submit"] {
 #controls li {
     padding:0;
     margin:0;
-    border-top:1px solid #ccc;
+    border-top:1px dotted blue;
 }
 #controls a {
     padding:0.5em 1em;
