@@ -157,12 +157,16 @@ button[type="submit"] {
     border-top:3px solid #e6eefe;
 }
 #controls a {
-    padding:0.25em 0.5em;
+    padding:0.5em 1em;
     margin:0;
     border:1px solid transparent;
     display:block;
     text-decoration:none;
 }
+#controls a:hover {
+    border:1px solid blue;
+}
+
 #footer {
     clear:both;
     text-align:center;
