@@ -96,6 +96,13 @@ $(document).keydown(function(e) {
     </ul>
     {% endif %}
 
+    {% if page.parent %}
+    <p>Back up to...</p>
+    <ul>
+        <li><a href="{% url wiki_show page.parent %}">{{ page.parent.title }}</a></li>
+    </ul>
+    {% endif %}
+
 </div>
 {% endif %}
 
