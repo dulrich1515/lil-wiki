@@ -29,10 +29,10 @@ body {
     position:absolute;
     top:40px;
     right:0;
-    padding:2px 4px;
+    padding:0.2em;
     margin:0;
     list-style:none;
-    width:5.4em;
+    width:5.2em;
     text-align:right;
     overflow-x:scroll;
     transition:width 100ms;
@@ -47,8 +47,9 @@ body {
 #editor-controls li {
     display:block;
     width:10em;
-    margin:4px;
-    padding:0 0.5em;
+    padding-right:0.2em;
+    margin-top:2px;
+    margin-bottom:2px;
 }
 #editor-controls button { 
     width:6em;
