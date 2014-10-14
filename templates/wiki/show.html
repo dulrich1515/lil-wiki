@@ -35,7 +35,7 @@ $(document).keydown(function(e) {
     <h1 id="title">{{ page.title }}</h1>
 
     {% if page.parent %}
-    <p>Up to: <a class="parent-link" href="{% url wiki_show page.parent %}">{{ page.parent.title }}</a></p>
+    <p class="noprint">Up to: <a class="parent-link" href="{% url wiki_show page.parent %}">{{ page.parent.title }}</a></p>
     {% endif %}
 
     {% if page.content %} 
