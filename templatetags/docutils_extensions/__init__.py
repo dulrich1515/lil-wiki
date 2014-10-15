@@ -3,11 +3,14 @@ from __future__ import unicode_literals
 
 import codecs
 import hashlib
+import json
 import os
 import posixpath
+import random
 import re
 import shutil
 import sys
+import yaml
 
 from subprocess import Popen, PIPE
 from PIL import Image
@@ -405,40 +408,40 @@ def jargon_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
 
 ## -------------------------------------------------------------------------- ##
 
-class toggle_directive(rst.Directive):
+# class toggle_directive(rst.Directive):
 
-    required_arguments = 0
-    optional_arguments = 1
-    final_argument_whitespace = True
-    option_spec = {
-        'access'     : rst.directives.unchanged,
-    }
-    has_content = True
+    # required_arguments = 0
+    # optional_arguments = 1
+    # final_argument_whitespace = True
+    # option_spec = {
+        # 'access'     : rst.directives.unchanged,
+    # }
+    # has_content = True
 
-    def run(self):
+    # def run(self):
 
-        self.assert_has_content()
-        content = '\n'.join(self.content).replace('\\\\','\\')
+        # self.assert_has_content()
+        # content = '\n'.join(self.content).replace('\\\\','\\')
 
-        button_text = ''
-        if self.arguments:
-            button_text = self.arguments[0]
+        # button_text = ''
+        # if self.arguments:
+            # button_text = self.arguments[0]
 
-        if 'access' in self.options.keys():
-            access = self.options['access']
+        # if 'access' in self.options.keys():
+            # access = self.options['access']
 
-        text = ''
-        text += '<div class="docutils-extensions toggle">\n'
-        text += '<p><input class="toggler" type="button" value="{0}"></p>\n'.format(button_text)
-        text += '<div class="togglee" style="display:none">\n'
-        text += rst2html(content) + '\n'
-        text += '</div>\n'
-        text += '</div>\n'
+        # text = ''
+        # text += '<div class="docutils-extensions toggle">\n'
+        # text += '<p><input class="toggler" type="button" value="{0}"></p>\n'.format(button_text)
+        # text += '<div class="togglee" style="display:none">\n'
+        # text += rst2html(content) + '\n'
+        # text += '</div>\n'
+        # text += '</div>\n'
 
-        node = nodes.raw(text=text, format='html', **self.options)
-        node_list = [node]
+        # node = nodes.raw(text=text, format='html', **self.options)
+        # node_list = [node]
 
-        return node_list
+        # return node_list
 
 ## -------------------------------------------------------------------------- ##
 
@@ -863,3 +866,242 @@ class ani_directive(rst.Directive):
         return node_list
 
 ## -------------------------------------------------------------------------- ##
+
+class problem_set_directive(rst.Directive):
+    """
+    -----------------------------------
+    Docutils directive: ``problem-set``
+    -----------------------------------
+
+    Inserts a list of word problems.
+
+    Example
+    -------
+
+    ::
+
+        .. problem-set:: Homework for Week 1
+            :numbering: none
+            :solutions: hide
+
+            [
+                {
+                    "question": "What is the speed of light?",
+                    "answer": ":sci:`2.998E8` m/s",
+                    "solution": "Ask Google__. \n\n__ http://www.google.com"
+                },
+                {
+                    "question": "The Great Question of Life, the Universe, and Everything.",
+                    "answer": "42",
+                    "solution": "What do you get if you multiply six by nine?"
+                }
+            ]
+    
+    Options
+    -------
+
+        :numbering:   [*default*, none, bullets] + [0,1,2,3,...]
+        :answers:     [*show*, toggle, hide]
+        :solutions:   [show, *toggle*, hide]
+        :print-style: [*compact*, simple]
+
+    Notes
+    -----
+
+    * Argument will be used as a subtitle.
+    * Content required. 
+    * Content may mix explicit problem dictionaries with slug references
+    * Attempt to parse content as YAML then JSON. Malformed content will be returned.
+    """
+
+    required_arguments = 0
+    optional_arguments = 1
+    final_argument_whitespace = True
+    option_spec = {
+        'numbering'   : rst.directives.unchanged,
+        'answers'     : rst.directives.unchanged,
+        'solutions'   : rst.directives.unchanged,
+        'print-style' : rst.directives.unchanged,
+        }
+    has_content = True
+
+    def unpack(self, problem, format):
+    
+        question = problem.get('question','')
+        answer = problem.get('answer','')
+        solution = problem.get('solution','')
+
+        if not question:
+            question = 'Question not available'
+        if not answer:
+            answer = '[missing]'
+        if not solution:
+            solution = 'No solution available'
+        
+        if format == 'html':
+            writer = rst2html
+            kwargs = {'inline': True}
+        # elif format == 'latex':
+            # writer = rst2latex
+            # kwargs = {}
+        else:
+            writer = None
+            kwargs = {}
+
+        def write_part(part, writer=None, kwargs={}):
+            if writer:
+                part = part.strip()
+                if part[0] == '(': part = '\\' + part
+                return writer(part, **kwargs)
+            else:
+                return part
+            
+        question = write_part(question, writer, kwargs)
+        answer = write_part(answer, writer, kwargs)
+        solution = write_part(solution, writer, kwargs)
+            
+        return question, answer, solution        
+        
+    def run(self):
+
+        # Parse directive data
+
+        self.assert_has_content()
+        content = '\n'.join(self.content).replace('\\\\','\\')
+
+        caption = ''
+        if self.arguments: # use as caption
+            caption = self.arguments[0]
+
+        option_choices = ['default','none','bullets']
+        numbering = self.options.get('numbering', option_choices[0])
+        try:
+            list_start = int(numbering)
+        except:
+            list_start = 1
+            if numbering not in option_choices:
+                numbering == option_choices[0]
+            if numbering == 'none':
+                numbering = ''
+            
+        option_choices = ['show','toggle','hide']
+        answers = self.options.get('answers', option_choices[0])
+        if answers not in option_choices:
+            answers = option_choices[0]
+
+        option_choices = ['toggle','hide','show']
+        solutions = self.options.get('solutions', option_choices[0])
+        if solutions not in option_choices:
+            solutions = option_choices[0]
+
+        option_choices = ['simple','compact']
+        print_style = self.options.get('print-style', option_choices[0])
+        if print_style not in option_choices:
+            print_style = option_choices[0]
+
+        # Begin output
+            
+        node_list = []
+
+        for load in [yaml.load, json.loads]:
+            try:
+                problem_set = load(content)
+            except:
+                problem_set = []
+            if problem_set: break
+                
+        # HTML writer specifics start...
+        
+        if problem_set:
+            text = ''
+            
+            if caption:
+                text += '<h4>{}</h4>\n'.format(rst2html(caption, inline=True))
+
+            if numbering:
+                if numbering == 'bullets':
+                    text += '<ul class="inside-list">\n'
+                else:
+                    # ERROR: not sure why this markup does not seem to catch for list_start > 1 ...
+                    text += '<ol start="{}" class="inside-list">\n'.format(list_start)
+
+            n = list_start - 1
+            for problem in problem_set:
+                n += 1
+                q, a, s = self.unpack(problem, format='html')
+                toggle_id = '{:09}'.format(random.randrange(0,1e9))
+
+                if numbering: 
+                    text += '<li>\n'
+                    
+                if answers == 'toggle':
+                    text += '<input class="toggler" type="button" rel="a{}" value="Show Answer" onclick="buttonToggle(this,\'Show Answer\',\'Hide Answer\')">\n'.format(toggle_id)
+                if solutions == 'toggle':
+                    text += '<input class="toggler" type="button" rel="s{}" value="Show Solution" onclick="buttonToggle(this,\'Show Solution\',\'Hide Solution\')">\n'.format(toggle_id)
+                text += '<p>{}</p>\n'.format(q)
+                
+                if answers == 'show':
+                    text += '<p id="a{}">\n<i>Answer:</i> {}\n</p>\n'.format(toggle_id, a)
+                elif answers == 'toggle':
+                    text += '<div id="a{}" class="togglee">\n<i>Answer:</i> {}\n</div>\n'.format(toggle_id, a)
+
+                if solutions == 'show':
+                    text += '<div id="s{}" class="solution" style="display:block">\n<p>{}</p>\n</div>\n'.format(toggle_id, s)
+                elif solutions == 'toggle':
+                    text += '<div id="s{}" class="solution togglee">\n<p>{}</p>\n</div>\n'.format(toggle_id, s)
+                    
+                if numbering: 
+                    text += '</li>\n'
+                
+            if numbering:
+                if numbering == 'bullets':
+                    text += '</ul>\n'
+                else:
+                    text += '</ol>\n'
+        else:
+            text = '<pre>Malformed input\n\n{}</pre>'.format(content)
+
+        node = nodes.raw(text=text, format='html', **self.options)
+        node_list += [node]
+
+        # # LaTeX writer specifics
+        
+        # text = ''
+        # if problem_set:
+            # if caption:
+                # text += '\\subsubsection*{{{}}}\n\n'.format(rst2latex(caption))
+
+            # n = list_start - 1
+            # for problem in problem_set:
+                # n += 1
+                # q, a, s = self.unpack(problem, format='latex')
+                
+                # if print_style == 'simple':
+                    # text += '\\textbf{{{0}.}}\n'.format(n)
+                    # text += '\\quad \n{0}\n'.format(q)
+                    # if answers in ['show','toggle']:
+                        # text += '\\par \\textbf{{Answer:}} {0}\n'.format(a)
+                    # if solutions in ['show','toggle']:
+                        # text += '\\par \\textbf{{Solution:}}\n\\par {0}\n'.format(s)
+                    # text += '\n'
+                # else:
+                    # text += '\\addtolength\\textwidth{-\\adjwidth}'
+                    # text += '\\textbf{{{0}.}}\n'.format(n)
+                    # if answers in ['show','toggle']:
+                        # text += '\\marginpar{{\\footnotesize\\sf {0}}}\n'.format(a)
+                    # text += '\\quad \n{0}\n'.format(q)
+                    # if solutions in ['show','toggle']:
+                        # text += '\\par \\textbf{{Solution:}}\n\\par {0}\n'.format(s)
+                    # text += '\n'
+        # else:
+            # text += '\\emph{Malformed input}\n'
+            # text += '\\begin{verbatim}\n'
+            # text += '{}\n'.format(content)
+            # text += '\\end{verbatim}\n'
+            # text += '\n'
+        
+        # node = nodes.raw(text=text, format='latex', **self.options)
+        # node_list += [node]
+        
+        return node_list
+        

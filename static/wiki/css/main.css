@@ -312,6 +312,45 @@ table.series-links td {
     -ms-interpolation-mode: bicubic;
 }
 
+
+
+.toggler {
+    float:right;
+    margin-left:1em;
+}
+.togglee {
+    display:none;
+}
+.solution {
+    display:none;
+    padding:0 1em;
+    margin:1em 0;
+    border:1px solid red;
+    overflow-x:auto;
+}
+
+ol.inside-list {
+    list-style-position:inside;
+    padding-left:0;
+}
+ol.inside-list {
+    list-style-type:none;
+    counter-reset:li;    
+}
+ol.inside-list * {
+    list-style-type:outside;
+}
+ol.inside-list > li:before {
+    content: counter(li) ".";
+    counter-increment: li;
+    float:left;
+    font-weight:bold;
+    margin-right:1em;
+}
+ul.inside-list {
+    padding-left:1.5em;
+}
+
 /*****************/
 /* Special media */
 /*****************/

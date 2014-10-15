@@ -43,7 +43,7 @@ $(document).keydown(function(e) {
     }
 });
 
-
+/*
 $(document).ready(function() {
     $('.toggler').val( function( index, val ) {
         return val + ' ▸'; // ◂
@@ -56,6 +56,7 @@ $(document).ready(function() {
         $(this).val(v1 + v2);
     });
 });
+*/
 
 $(document).ready(function($) {
     var upChar = '\u25b3';
