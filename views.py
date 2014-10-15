@@ -41,13 +41,13 @@ def show(request, pg=''):
     # page = Page.objects.get(pg)
     page = Page(pg)
 
-    if not page.exists:
-        if not request.user.is_authenticated:
-            template = 'wiki/404.html'
-        else:
-            template = 'wiki/edit.html'
-    else:
+    if page.exists:
         template = 'wiki/show.html'
+    else:
+        if request.user.is_authenticated():
+            template = 'wiki/edit.html'
+        else:
+            template = 'wiki/404.html'
     context = {
         'page' : page,
     }
