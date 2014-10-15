@@ -337,6 +337,9 @@ ol.inside-list {
     list-style-type:none;
     counter-reset:li;    
 }
+ol.inside-list[start="5"] {
+    counter-reset:li 4;
+}
 ol.inside-list * {
     list-style-type:outside;
 }
