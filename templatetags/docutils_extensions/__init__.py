@@ -967,7 +967,7 @@ class problem_set_directive(rst.Directive):
         # Parse directive data
 
         self.assert_has_content()
-        content = '\n'.join(self.content).replace('\\\\','\\')
+        content = '\n'.join(self.content) # .replace('\\\\','\\')
 
         caption = ''
         if self.arguments: # use as caption
