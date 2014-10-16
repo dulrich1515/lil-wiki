@@ -1034,13 +1034,13 @@ class problem_set_directive(rst.Directive):
                 if numbering: 
                     text += '<li>\n'
                     
-                text += '<p>{}</p>\n'.format(q)
-
                 if answers == 'toggle':
                     text += '<input class="toggler" type="button" rel="a{}" value="Show Answer" onclick="buttonToggle(this,\'Show Answer\',\'Hide Answer\')">\n'.format(toggle_id)
                 if solutions == 'toggle':
                     text += '<input class="toggler" type="button" rel="s{}" value="Show Solution" onclick="buttonToggle(this,\'Show Solution\',\'Hide Solution\')">\n'.format(toggle_id)
                 
+                text += '<p>{}</p>\n'.format(q)
+
                 if answers == 'show':
                     text += '<p id="a{}">\n<i>Answer:</i> {}\n</p>\n'.format(toggle_id, a)
                 elif answers == 'toggle':
