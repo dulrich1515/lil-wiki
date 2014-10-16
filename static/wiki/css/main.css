@@ -337,9 +337,25 @@ ol.inside-list {
     list-style-type:none;
     counter-reset:li;    
 }
-ol.inside-list[start="5"] {
-    counter-reset:li 4;
-}
+ol.inside-list[start="01"] { counter-reset:li 00; }
+ol.inside-list[start="02"] { counter-reset:li 01; }
+ol.inside-list[start="03"] { counter-reset:li 02; }
+ol.inside-list[start="04"] { counter-reset:li 03; }
+ol.inside-list[start="05"] { counter-reset:li 04; }
+ol.inside-list[start="06"] { counter-reset:li 05; }
+ol.inside-list[start="07"] { counter-reset:li 06; }
+ol.inside-list[start="08"] { counter-reset:li 07; }
+ol.inside-list[start="09"] { counter-reset:li 08; }
+ol.inside-list[start="10"] { counter-reset:li 09; }
+ol.inside-list[start="11"] { counter-reset:li 10; }
+ol.inside-list[start="12"] { counter-reset:li 11; }
+ol.inside-list[start="13"] { counter-reset:li 12; }
+ol.inside-list[start="14"] { counter-reset:li 13; }
+ol.inside-list[start="15"] { counter-reset:li 14; }
+ol.inside-list[start="16"] { counter-reset:li 15; }
+ol.inside-list[start="17"] { counter-reset:li 16; }
+ol.inside-list[start="18"] { counter-reset:li 17; }
+ol.inside-list[start="19"] { counter-reset:li 18; }
 ol.inside-list * {
     list-style-type:outside;
 }

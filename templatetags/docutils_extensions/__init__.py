@@ -1023,7 +1023,7 @@ class problem_set_directive(rst.Directive):
                     text += '<ul class="inside-list">\n'
                 else:
                     # ERROR: not sure why this markup does not seem to catch for list_start > 1 ...
-                    text += '<ol start="{}" class="inside-list">\n'.format(list_start)
+                    text += '<ol start="{:02}" class="inside-list">\n'.format(list_start)
 
             n = list_start - 1
             for problem in problem_set:
