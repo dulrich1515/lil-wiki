@@ -316,7 +316,9 @@ table.series-links td {
 
 .toggler {
     float:right;
+    margin:0;
     margin-left:1em;
+    padding:5px 10px;
 }
 .togglee {
     display:none;
