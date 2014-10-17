@@ -1039,18 +1039,27 @@ class problem_set_directive(rst.Directive):
 
                 text += '<p>{}</p>\n'.format(q)
 
-                if solutions == 'toggle':
-                    text += '<input class="toggler" type="button" rel="s{}" value="Show Solution" onclick="buttonToggle(this,\'Show Solution\',\'Hide Solution\')">\n'.format(toggle_id)
-                
                 if answers == 'show':
-                    text += '<p id="a{}">\n<i>Answer:</i> {}\n</p>\n'.format(toggle_id, a)
+                    text += '<p id="a{}">\n'.format(toggle_id)
+                    if solutions == 'toggle':
+                        text += '<input class="toggler" type="button" rel="s{}" value="Show Solution" onclick="buttonToggle(this,\'Show Solution\',\'Hide Solution\')">\n'.format(toggle_id)
+                    text += '<i>Answer:</i> {}\n'.format(a)
+                    text += '</p>\n'
                 elif answers == 'toggle':
-                    text += '<div id="a{}" class="togglee">\n<i>Answer:</i> {}\n</div>\n'.format(toggle_id, a)
+                    text += '<div id="a{}" class="togglee">\n'.format(toggle_id)
+                    if solutions == 'toggle':
+                        text += '<input class="toggler" type="button" rel="s{}" value="Show Solution" onclick="buttonToggle(this,\'Show Solution\',\'Hide Solution\')">\n'.format(toggle_id)
+                    text += '<i>Answer:</i> {}\n'.format(a)
+                    text += '</div>\n'
 
                 if solutions == 'show':
-                    text += '<div id="s{}" class="solution" style="display:block">\n<p>{}</p>\n</div>\n'.format(toggle_id, s)
+                    text += '<div id="s{}" class="solution" style="display:block">\n'.format(toggle_id)
+                    text += '<p>{}</p>\n'.format(s)
+                    text += '</div>\n'
                 elif solutions == 'toggle':
-                    text += '<div id="s{}" class="solution togglee">\n<p>{}</p>\n</div>\n'.format(toggle_id, s)
+                    text += '<div id="s{}" class="solution togglee">\n'.format(toggle_id)
+                    text += '<p>{}</p>\n'.format(s)
+                    text += '</div>\n'
                     
                 if numbering: 
                     text += '</li>\n'
