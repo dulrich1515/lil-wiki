@@ -332,6 +332,18 @@ table.series-links td {
     overflow-x:auto;
 }
 
+/*****************/
+/* Special media */
+/*****************/
+
+@media screen and (min-width:960px) {
+/* TABLET or SCREEN */
+    #side-content {
+        float:right;
+        margin:1em 0 1em 1em;
+        max-width:45%;
+    }
+    
 ol.inside-list {
     list-style-position:inside;
     padding-left:0;
@@ -439,6 +451,7 @@ ol.inside-list[start="96"] { counter-reset:li 95; }
 ol.inside-list[start="97"] { counter-reset:li 96; }
 ol.inside-list[start="98"] { counter-reset:li 97; }
 ol.inside-list[start="99"] { counter-reset:li 98; }
+
 ol.inside-list * {
     list-style-type:outside;
 }
@@ -453,15 +466,4 @@ ul.inside-list {
     padding-left:1.5em;
 }
 
-/*****************/
-/* Special media */
-/*****************/
-
-@media screen and (min-width:960px) {
-/* TABLET or SCREEN */
-    #side-content {
-        float:right;
-        margin:1em 0 1em 1em;
-        max-width:45%;
-    }
 }
