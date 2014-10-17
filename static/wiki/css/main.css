@@ -318,6 +318,7 @@ table.series-links td {
     float:right;
     margin:0;
     margin-left:1em;
+    margin-top:-0.5em;
     padding:5px 10px;
 }
 .togglee {
