@@ -343,6 +343,9 @@ table.series-links td {
         margin:1em 0 1em 1em;
         max-width:45%;
     }
+}
+
+@media screen and (max-width:480px) {
     
 ol.inside-list {
     list-style-position:inside;
@@ -352,6 +355,7 @@ ol.inside-list {
     list-style-type:none;
     counter-reset:li;    
 }
+
 ol.inside-list[start="01"] { counter-reset:li 00; }
 ol.inside-list[start="02"] { counter-reset:li 01; }
 ol.inside-list[start="03"] { counter-reset:li 02; }
