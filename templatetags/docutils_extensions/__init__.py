@@ -932,13 +932,14 @@ class problem_set_directive(rst.Directive):
         solution = problem.get('solution','')
 
         if not question:
-            question = 'Question not available'
+            question = '``Question not available``'
         if not answer:
-            answer = '[missing]'
+            answer = '``Missing``'
         if not solution:
-            solution = 'No solution available'
+            solution = '``No solution available``'
         
         if format == 'html':
+
             writer = rst2html
             kwargs = {'inline': True}
         # elif format == 'latex':
