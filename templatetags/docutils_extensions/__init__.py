@@ -406,6 +406,28 @@ def jargon_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
 
     return node_list, []
 
+# -------------------------------------------------------------------------- ##
+
+def highlight_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
+
+    """
+    ----------------------------
+    Docutils role: ``highlight``
+    ----------------------------
+
+    Highlights a span of text.
+    """
+
+    t['latex'] = '\underline{{{}}}'.format(text)
+    t['html'] = '<span class="highlight">{}</span>'.format(text)
+
+    node_list = [
+        nodes.raw(text=t['latex'], format='latex'),
+        nodes.raw(text=t['html'], format='html')
+    ]
+
+    return node_list, []
+
 ## -------------------------------------------------------------------------- ##
 
 # class toggle_directive(rst.Directive):

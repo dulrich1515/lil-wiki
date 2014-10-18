@@ -5,6 +5,7 @@ import docutils_extensions
 rst.roles.register_local_role('sci', docutils_extensions.sci_role)
 rst.roles.register_local_role('atm', docutils_extensions.atm_role)
 rst.roles.register_local_role('jargon', docutils_extensions.jargon_role)
+rst.roles.register_local_role('highlight', docutils_extensions.highlight_role)
 
 # rst.roles.register_local_role('ref', docutils_extensions.ref_role)
 # rst.roles.register_local_role('eqn', docutils_extensions.ref_role)

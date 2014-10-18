@@ -332,6 +332,11 @@ table.series-links td {
     overflow-x:auto;
 }
 
+.highlight {
+    background:yellow;
+    color:red;
+}
+
 /*****************/
 /* Special media */
 /*****************/
@@ -346,6 +351,7 @@ table.series-links td {
 }
 
 @media screen and (max-width:480px) {
+/* PHONE ONLY */
     
 ol.inside-list {
     list-style-position:inside;
