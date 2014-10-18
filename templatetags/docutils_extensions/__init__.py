@@ -418,7 +418,9 @@ def highlight_role(role, rawtext, text, lineno, inliner, options={}, content=[])
     Highlights a span of text.
     """
 
-    t['latex'] = '\underline{{{}}}'.format(text)
+    t = dict()
+
+    t['latex'] = '\\underline{{{}}}'.format(text)
     t['html'] = '<span class="highlight">{}</span>'.format(text)
 
     node_list = [
