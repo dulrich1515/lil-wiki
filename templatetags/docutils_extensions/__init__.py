@@ -932,11 +932,11 @@ class problem_set_directive(rst.Directive):
         solution = problem.get('solution','')
 
         if not question:
-            question = '``Question not available``'
+            question = ':highlight:`Question not available`'
         if not answer:
-            answer = '``Missing``'
+            answer = ':highlight:`Missing`'
         if not solution:
-            solution = '``No solution available``'
+            solution = ':highlight:`No solution available`'
         
         if format == 'html':
 
