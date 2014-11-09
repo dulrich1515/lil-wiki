@@ -30,6 +30,7 @@ h4 {
     font-style:italic;
 }
 table {
+    margin:1em 0;
     border:1px solid #eee;
 }
 tr * {
@@ -252,6 +253,14 @@ table.series-links td {
 .admonition-title {
     font-weight:bold;
 }
+.field-name {
+    vertical-align:middle;
+}
+.field-body {
+    text-align:left;
+}
+
+
 
 .docutils-extensions.tbl {
     overflow-x:auto;
