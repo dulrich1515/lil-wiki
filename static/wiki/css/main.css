@@ -237,27 +237,30 @@ table.series-links td {
     text-align:center;
     vertical-align:top !important;
 }
+.warning,
 .admonition, 
-.sidebar, 
-.warning {
+.sidebar {
     padding:0 1em;
     margin:1em 0;
 }
+.admonition-title,
+.sidebar-title {
+    font-weight:bold;
+}
 .admonition {
+    border:1px solid blue;
+    background:#e6eefe;
+}
+.sidebar {
     border:1px solid #ccc;
     background:#eee;
-    /* background-image:url(../img/ast.png); */
-    /* background-position:top=2px left; */
-    /* background-repeat:no-repeat; */
-}
-.admonition-title {
-    font-weight:bold;
 }
 .field-name {
     vertical-align:middle;
 }
 .field-body {
     text-align:left;
+    width:100%;
 }
 
 
