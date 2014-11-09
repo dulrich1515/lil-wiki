@@ -236,9 +236,13 @@ table.series-links td {
     text-align:center;
     vertical-align:top !important;
 }
-.admonition {
+.admonition, 
+.sidebar, 
+.warning {
     padding:0 1em;
     margin:1em 0;
+}
+.admonition {
     border:1px solid #ccc;
     background:#eee;
     /* background-image:url(../img/ast.png); */
