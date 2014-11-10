@@ -30,6 +30,7 @@ h4 {
     font-style:italic;
 }
 table {
+    margin:1em 0;
     border:1px solid #eee;
 }
 tr * {
@@ -236,18 +237,39 @@ table.series-links td {
     text-align:center;
     vertical-align:top !important;
 }
-.admonition {
+.warning,
+.admonition, 
+.sidebar {
     padding:0 1em;
     margin:1em 0;
-    border:1px solid #ccc;
-    background:#eee;
-    /* background-image:url(../img/ast.png); */
-    /* background-position:top=2px left; */
-    /* background-repeat:no-repeat; */
 }
 .admonition-title {
     font-weight:bold;
+    border-bottom:1px dotted blue;
+    padding-bottom:1em;
 }
+.sidebar-title {
+    font-style:italic;
+    padding-bottom:1em;
+    border-bottom:1px solid #ccc;
+    color:#aaa;
+}
+.admonition {
+    border:1px solid blue;
+    background:#e6eefe;
+}
+.sidebar {
+    border:1px solid #ccc;
+}
+.field-name {
+    vertical-align:middle;
+}
+.field-body {
+    text-align:left;
+    width:100%;
+}
+
+
 
 .docutils-extensions.tbl {
     overflow-x:auto;
@@ -328,7 +350,7 @@ table.series-links td {
     display:none;
     padding:0 1em;
     margin:1em 0;
-    border:1px solid red;
+    border:1px solid #ccc;
     overflow-x:auto;
 }
 
