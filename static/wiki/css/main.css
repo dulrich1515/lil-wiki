@@ -243,17 +243,23 @@ table.series-links td {
     padding:0 1em;
     margin:1em 0;
 }
-.admonition-title,
+.admonition-title {
+    font-weight:bold;
+    border-bottom:1px dotted blue;
+    padding-bottom:1em;
+}
 .sidebar-title {
     font-weight:bold;
+    border-bottom:1px dotted gray;
+    padding-bottom:1em;
 }
 .admonition {
     border:1px solid blue;
     background:#e6eefe;
 }
 .sidebar {
-    border:1px solid #ccc;
-    background:#eee;
+    border:1px solid gray;
+    background:#f8f8f8;
 }
 .field-name {
     vertical-align:middle;
