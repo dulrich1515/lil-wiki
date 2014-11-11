@@ -105,6 +105,16 @@ def rst2latex(source, initial_header_level=-1):
     return latex.strip()
 
 ## -------------------------------------------------------------------------- ##
+
+def get_latex_path(filename):
+    filename = filename.split(os.path.sep)
+    for i in range(len(filename)):
+        if ' ' in filename[i]:
+            filename[i] = '"%s"' % filename[i]
+    filename = '/'.join(filename)
+    return filename
+
+## -------------------------------------------------------------------------- ##
     
 def make_pdf(latex, repeat=1):
 
@@ -154,3 +164,5 @@ def make_pdf(latex, repeat=1):
     # assert False
     
     return os.path.join(TEMP_PATH, pdfname)
+    
+## -------------------------------------------------------------------------- ##

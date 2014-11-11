@@ -117,9 +117,9 @@ $(document).keydown(function(e) {
         {% endif %}
         <li><a href="{% url wiki_root %}">WikiRoot</a></li>
         {% if user.is_staff %}
-        <li><a href="{% url wiki_edit page %}">Edit Page</a></li>
+        <li><a href="{% url wiki_edit page %}">Edit</a></li>
         {% endif %}
-        <li><a href="{% url wiki_ppdf page %}">Make PDF</a></li>
+        <li><a href="{% url wiki_ppdf page %}">PDF</a></li>
     </ul>
 </div>
 

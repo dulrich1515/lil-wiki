@@ -17,6 +17,8 @@ from docutils import nodes
 from docutils.parsers import rst
 
 from utils import rst2html
+from utils import rst2latex
+from utils import get_latex_path
 
 from config import *
 
@@ -72,6 +74,8 @@ class tbl_directive(rst.Directive):
 
     def run(self):
 
+        node_list = []
+    
         self.assert_has_content()
         try:
             parser = rst.tableparser.GridTableParser()
@@ -150,10 +154,125 @@ class tbl_directive(rst.Directive):
             text += '</div>\n'
 
         node = nodes.raw(text=text, format='html', **self.options)
-        node_list = [node]
+        node_list += [node]
 
+        
+        
+        
+        
+# Create latex node
+        
+        text = ''
+        if tbl:
+            
+            label = ''
+            if 'label' in self.options.keys():
+                label = nodes.make_id(self.options['label'])
+        
+            caption = ''
+            if self.arguments: # use as caption
+                caption = rst2latex(self.arguments[0])
+
+            colspec = len(colspecs) * 'c'
+            if 'cols' in self.options.keys():
+                colspec = self.options['cols']
+        
+            text += '\\renewcommand{\\arraystretch}{1.5}\n'
+            text += '\\renewcommand{\\tabcolsep}{0.2cm}\n'
+            text += '\\begin{center}\n'
+
+            if label:
+                text += '\\label{{tbl:{0}}}\n'.format(label)
+                
+            text += '\\begin{{tabular}}{{{0}}}\n'.format(colspec)
+            text += '\\hline\n'
+            if headrows:
+                for row in headrows:
+                    celltext = []
+                    for cell in row:
+                        if cell:
+                            celltext += [rst2latex('\n'.join(cell[3]))]
+                        else:
+                            celltext += ['']
+                    text += ' & '.join(celltext) + ' \\\\\n'
+                text += '\\hline\n'
+            for row in bodyrows:
+                celltext = []
+                for cell in row:
+                    if cell:
+                        celltext.append(rst2latex('\n'.join(cell[3])))
+                    else:
+                        celltext.append('')
+                text += ' & '.join(celltext) + ' \\\\\n'
+            text += '\\hline\n'
+            text += '\\end{tabular}\n'
+
+            if caption:
+                text += '\\captionof{{table}}{{{0}}}\n'.format(caption)
+
+            text += '\\end{center}\n'
+        
+        node = nodes.raw(text=text, format='latex', **self.options)
+        node_list += [node]
+
+        
+        
         return node_list
 ## -------------------------------------------------------------------------- ##
+
+FIG_TEMPLATE = {
+'default' : r'''
+\begin{center}
+%(figtext)s
+%(caption)s
+%(label)s
+\end{center}
+'''
+,
+'left' : r'''
+%(figtext)s
+%(caption)s
+%(label)s
+'''
+,
+'side' : r'''
+\marginpar{
+\vspace{%(offset)s}
+\vspace{0.1in}
+\centering
+%(figtext)s
+%(caption)s
+%(label)s
+}
+'''
+,
+'sidecap' : r'''
+\vspace{0.1in}
+\begin{adjustwidth}{}{\adjwidth}
+\begin{minipage}[c]{\picwidth}
+\centering
+%(figtext)s
+\end{minipage}
+\hfill
+\begin{minipage}[c]{\capwidth}
+%(caption)s
+%(label)s
+\end{minipage}
+\end{adjustwidth}
+\vspace{0.1in}
+'''
+,
+'full' : r'''
+\vspace{0.1in}
+\begin{adjustwidth}{}{\adjwidth}
+\centering
+%(figtext)s
+%(caption)s
+%(label)s
+\end{adjustwidth}
+\vspace{0.1in}
+'''
+}
 
 class fig_directive(rst.Directive):
 
@@ -219,6 +338,7 @@ class fig_directive(rst.Directive):
     def run(self):
 
         node_list = []
+
         text = ''
         
         try:
@@ -310,10 +430,67 @@ class fig_directive(rst.Directive):
                 text += rst2html(self.arguments[0])
 
             text += '</div>\n'            
-
+            
         node = nodes.raw(text=text, format='html', **self.options)
         node_list += [node]
 
+
+
+
+        
+# LaTeX writer specifics start (offset is ignored for HTML writer)
+
+        if self.arguments:
+            caption = rst2latex(self.arguments[0])
+            caption = r'\captionof{figure}{%s}' % caption
+        else:
+            caption = ''
+
+        if 'label' in self.options.keys():
+            label = nodes.make_id(self.options['label'])
+            label = r'\label{fig:%s}' % label
+        else:
+            label = ''
+
+        if 'image' in self.options.keys():
+            image = self.options['image']
+
+            if str(image).rsplit('.',1)[1] in ['png','jpg','gif','pdf']:
+
+                if not os.path.exists(image_path):
+                    print 'Could not locate "%s"' % image_path
+
+                latex_path = get_latex_path(image_path)
+
+                figtext = r'\includegraphics[scale=%s]{%s}'
+                figtext = figtext % (scale, latex_path)
+                if not label:
+                    label = nodes.make_id(image)
+                    label = r'\label{fig:%s}' % label
+            else:
+                figtext = image
+        else:
+# Note the `everymath` statement below. This switches the default behavior of 
+# inline math to display style. For *figures* I am constantly enforcing display
+# mode, so this seems like a better default for my purpose. Use `textstyle` to 
+# get the regular behavior, e.g., "\textstyle \int x dx = \frac{1}{2} x^2"
+            figtext = '\n\\everymath{\\displaystyle}\n'
+            figtext += '\n'.join(self.content)
+            figtext += '\n\\everymath{\\textstyle}\n'
+
+        text = FIG_TEMPLATE['default'] % {
+            'caption'   : caption,
+            'label'     : label,
+            'figtext'   : figtext,
+            }
+
+        node = nodes.raw(text=text, format='latex', **self.options)
+        node_list += [node]
+        
+        
+        
+        
+        
         return node_list
         
     def build_image(self, image_path, content, type, template):
@@ -435,53 +612,6 @@ class fig_directive(rst.Directive):
         
 ## -------------------------------------------------------------------------- ##
 
-class plt_directive(rst.Directive):
-
-    required_arguments = 0
-    optional_arguments = 1
-    final_argument_whitespace = True
-    option_spec = {
-        'scale'     : rst.directives.unchanged,
-        'label'     : rst.directives.unchanged,
-    }
-    has_content = True
-
-    def run(self):
-
-        node_list = []
-        text = '\n'
-
-        try:
-            scale = float(self.options['scale'])
-        except:
-            scale = 1.00
-
-
-
-        node = nodes.raw(text=text, format='html', **self.options)
-        node_list += [node]
-
-        return node_list
-
-## -------------------------------------------------------------------------- ##
-
-class ani_directive(rst.Directive):
-
-    required_arguments = 0
-    optional_arguments = 1
-    final_argument_whitespace = True
-    option_spec = {}
-    has_content = True
-
-    def run(self):
-
-        self.assert_has_content()
-        node_list = []
-
-        return node_list
-
-## -------------------------------------------------------------------------- ##
-
 class problem_set_directive(rst.Directive):
     """
     -----------------------------------
@@ -554,12 +684,11 @@ class problem_set_directive(rst.Directive):
             solution = ':highlight:`No solution available`'
         
         if format == 'html':
-
             writer = rst2html
             kwargs = {'inline': True}
-        # elif format == 'latex':
-            # writer = rst2latex
-            # kwargs = {}
+        elif format == 'latex':
+            writer = rst2latex
+            kwargs = {}
         else:
             writer = None
             kwargs = {}
@@ -691,43 +820,43 @@ class problem_set_directive(rst.Directive):
         node = nodes.raw(text=text, format='html', **self.options)
         node_list += [node]
 
-        # # LaTeX writer specifics
+        # LaTeX writer specifics
         
-        # text = ''
-        # if problem_set:
-            # if caption:
-                # text += '\\subsubsection*{{{}}}\n\n'.format(rst2latex(caption))
+        text = ''
+        if problem_set:
+            if caption:
+                text += '\\subsubsection*{{{}}}\n\n'.format(rst2latex(caption))
 
-            # n = list_start - 1
-            # for problem in problem_set:
-                # n += 1
-                # q, a, s = self.unpack(problem, format='latex')
+            n = list_start - 1
+            for problem in problem_set:
+                n += 1
+                q, a, s = self.unpack(problem, format='latex')
                 
-                # if print_style == 'simple':
-                    # text += '\\textbf{{{0}.}}\n'.format(n)
-                    # text += '\\quad \n{0}\n'.format(q)
-                    # if answers in ['show','toggle']:
-                        # text += '\\par \\textbf{{Answer:}} {0}\n'.format(a)
-                    # if solutions in ['show','toggle']:
-                        # text += '\\par \\textbf{{Solution:}}\n\\par {0}\n'.format(s)
-                    # text += '\n'
-                # else:
-                    # text += '\\addtolength\\textwidth{-\\adjwidth}'
-                    # text += '\\textbf{{{0}.}}\n'.format(n)
-                    # if answers in ['show','toggle']:
-                        # text += '\\marginpar{{\\footnotesize\\sf {0}}}\n'.format(a)
-                    # text += '\\quad \n{0}\n'.format(q)
-                    # if solutions in ['show','toggle']:
-                        # text += '\\par \\textbf{{Solution:}}\n\\par {0}\n'.format(s)
-                    # text += '\n'
-        # else:
-            # text += '\\emph{Malformed input}\n'
-            # text += '\\begin{verbatim}\n'
-            # text += '{}\n'.format(content)
-            # text += '\\end{verbatim}\n'
-            # text += '\n'
+                if print_style == 'simple':
+                    text += '\\textbf{{{0}.}}\n'.format(n)
+                    text += '\\quad \n{0}\n'.format(q)
+                    if answers in ['show','toggle']:
+                        text += '\\par \\textbf{{Answer:}} {0}\n'.format(a)
+                    if solutions in ['show','toggle']:
+                        text += '\\par \\textbf{{Solution:}}\n\\par {0}\n'.format(s)
+                    text += '\n'
+                else:
+                    text += '\\addtolength\\textwidth{-\\adjwidth}'
+                    text += '\\textbf{{{0}.}}\n'.format(n)
+                    if answers in ['show','toggle']:
+                        text += '\\marginpar{{\\footnotesize\\sf {0}}}\n'.format(a)
+                    text += '\\quad \n{0}\n'.format(q)
+                    if solutions in ['show','toggle']:
+                        text += '\\par \\textbf{{Solution:}}\n\\par {0}\n'.format(s)
+                    text += '\n'
+        else:
+            text += '\\emph{Malformed input}\n'
+            text += '\\begin{verbatim}\n'
+            text += '{}\n'.format(content)
+            text += '\\end{verbatim}\n'
+            text += '\n'
         
-        # node = nodes.raw(text=text, format='latex', **self.options)
-        # node_list += [node]
+        node = nodes.raw(text=text, format='latex', **self.options)
+        node_list += [node]
         
         return node_list
