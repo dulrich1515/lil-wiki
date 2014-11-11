@@ -15,7 +15,7 @@ from django.template.defaultfilters import slugify
 from config import wiki_pages_path
 
 from utils import render_to_response
-from templatetags.docutils_extensions import make_pdf
+from templatetags.docutils_extensions.utils import make_pdf
 
 from models import *
 
