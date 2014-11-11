@@ -11,13 +11,10 @@ from django.utils.safestring import mark_safe
 from docutils.core import publish_parts
 from docutils.writers import latex2e
 
-from . import config
-
-# System-specific commands/locations
-LATEX_PATH = config.LATEX_PATH
+from config import *
 
 # Directory to find working folder
-TEMP_PATH = os.path.join(config.WORK_PATH, 'latex', '_')
+TEMP_PATH = os.path.join(WORK_PATH, 'latex', '_')
 
 ## -------------------------------------------------------------------------- ##
 

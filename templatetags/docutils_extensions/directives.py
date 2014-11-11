@@ -322,7 +322,8 @@ class fig_directive(rst.Directive):
         ext = os.path.basename(image_path).split('.')[1]
         tempfile = '.'.join(['temp', ext])
         
-        try:
+        # try:
+        if 1==1:
             # Let's remember where we came from...
             curdir = os.getcwd()
             newdir = os.path.join(WORK_PATH, type, '_')
@@ -427,8 +428,8 @@ class fig_directive(rst.Directive):
                 print '* New file saved at {}'.format(image_path)
                 os.chdir(curdir)
                 
-        except:
-            pass
+        # except:
+            # pass
 
         return image_path
         
