@@ -21,6 +21,7 @@ from django.utils.safestring import mark_safe
 from docutils import nodes
 from docutils.core import publish_parts
 from docutils.parsers import rst
+from docutils.writers import latex2e
 
 # System-specific commands/locations
 LATEX_PATH = settings.TEX_PATH
@@ -37,6 +38,40 @@ WIKI_IMAGE_FOLDER = 'wiki'
 
 # Directory within WIKI_IMAGE_FOLDER where system-generated images will go
 SYSGEN_FOLDER = 'sysgen'
+
+## -------------------------------------------------------------------------- ##
+
+class MyLatexWriter(latex2e.Writer):
+
+    def __init__(self, initial_header_level=1):
+        latex2e.Writer.__init__(self)
+        if initial_header_level == 2:
+            self.translator_class = MyLatexTranslator2
+        elif initial_header_level == 1:
+            self.translator_class = MyLatexTranslator1
+        else:
+            self.translator_class = MyLatexTranslator0
+
+class MyLatexTranslator2(latex2e.LaTeXTranslator):
+    section_level = 2
+
+    def __init__(self, node):
+        latex2e.LaTeXTranslator.__init__(self, node)
+        self._section_number = self.section_level*[0]
+
+class MyLatexTranslator1(latex2e.LaTeXTranslator):
+    section_level = 1
+
+    def __init__(self, node):
+        latex2e.LaTeXTranslator.__init__(self, node)
+        self._section_number = self.section_level*[0]
+
+class MyLatexTranslator0(latex2e.LaTeXTranslator):
+    section_level = 0
+
+    def __init__(self, node):
+        latex2e.LaTeXTranslator.__init__(self, node)
+        self._section_number = self.section_level*[0]
 
 ## -------------------------------------------------------------------------- ##
 
@@ -74,7 +109,78 @@ def rst2html(source, initial_header_level=2, inline=False):
         html = ''
 
     return mark_safe(html)
+    
+def rst2latex(source, initial_header_level=2):
+    if source:
+        source = '.. default-role:: math\n\n' + source
+        writer = MyLatexWriter(initial_header_level)
+        
+        settings_overrides = {}
+        latex = publish_parts(
+            source=source,
+            writer=writer,
+            settings_overrides=settings_overrides,
+        )['body']
+        latex = latex.replace('-{}','-') # unwind this manipulation from docutils
+    else:
+        latex = ''
 
+    return latex.strip()
+
+## -------------------------------------------------------------------------- ##
+    
+TEMP_PATH = os.path.join(WORK_PATH, 'latex', '_')
+TEX_PATH = LATEX_PATH
+
+def make_pdf(latex, repeat=1):
+
+    curdir = os.getcwd()
+    os.chdir(TEMP_PATH)
+
+    basename = 'temp'
+
+    for ext in ['idx','ind','ilg','aux','log','out','toc','tex','pdf','png']:
+        try:
+            os.remove('{}.{}'.format(basename, ext))
+        except:
+            pass
+
+    texname = '{}.tex'.format(basename)
+    idxname = '{}.idx'.format(basename)
+    pdfname = '{}.pdf'.format(basename)
+
+    texfile = codecs.open(texname, 'w', 'utf-8')
+    texfile.write(latex)
+    texfile.close()
+
+    for i in range(repeat):
+        cmd = os.path.join(TEX_PATH, 'pdflatex')
+        cmd = [cmd, '--interaction=nonstopmode', texname]
+        p = Popen(cmd,stdout=PIPE,stderr=PIPE)
+        out, err = p.communicate()
+
+    try:
+        open(idxname)
+        if os.path.getsize(idxname):
+
+            cmd = os.path.join(TEX_PATH, 'makeindex')
+            cmd = [cmd,  idxname]
+            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+            out, err = p.communicate()
+
+            cmd = os.path.join(TEX_PATH, 'pdflatex')
+            cmd = [cmd, '--interaction=nonstopmode', texname]
+            p = Popen(cmd, stdout=PIPE, stderr=PIPE)
+            out, err = p.communicate()
+    except:
+        pass
+
+    os.chdir(curdir)
+
+    # assert False
+    
+    return os.path.join(TEMP_PATH, pdfname)
+    
 ## -------------------------------------------------------------------------- ##
 
 def sci_role(role, rawtext, text, lineno, inliner, options={}, content=[]):

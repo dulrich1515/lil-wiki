@@ -15,7 +15,8 @@ $(document).keydown(function(e) {
     {% endif %}
     if (key == 'p' && e.ctrlKey)
     {
-        window.print()
+        /* window.print() */
+        location.href='{% url wiki_ppdf page %}';
         e.preventDefault();
     }
     if (key == 'l' && e.ctrlKey)
@@ -118,6 +119,7 @@ $(document).keydown(function(e) {
         {% if user.is_staff %}
         <li><a href="{% url wiki_edit page %}">Edit Page</a></li>
         {% endif %}
+        <li><a href="{% url wiki_ppdf page %}">Show PDF</a></li>
     </ul>
 </div>
 

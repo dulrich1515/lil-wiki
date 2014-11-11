@@ -15,3 +15,7 @@ register = template.Library()
 @register.filter(is_safe=True)
 def rst2html(source, initial_header=2, inline=False):
     return docutils_extensions.rst2html(source, initial_header, inline)
+
+@register.filter(is_safe=True)
+def rst2latex(source, initial_header=2):
+    return docutils_extensions.rst2latex(source, initial_header)

@@ -9,9 +9,13 @@ from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.template import RequestContext, Context, loader
+from django.template.defaultfilters import slugify
 
 from config import wiki_pages_path
+
 from utils import render_to_response
+from templatetags.docutils_extensions import make_pdf
 
 from models import *
 
@@ -33,11 +37,6 @@ def list_by_name(request):
 
 
 def show(request, pg=''):
-#    if not pg:
-#        return list_by_name(request)
-    if pg[:1] == '/':
-        return redirect('wiki_show', pg[:1])
-
     # page = Page.objects.get(pg)
     page = Page(pg)
 
@@ -123,3 +122,33 @@ def post(request):
 
     # nothing should get here...
     return redirect('wiki_root')
+
+    
+def ppdf(request, pg=''):
+    # page = Page.objects.get(pg)
+    page = Page(pg)
+
+    context = {
+        'page' : page,
+    }
+
+    if not page.exists:
+        if request.user.is_authenticated():
+            template = 'wiki/edit.html'
+        else:
+            template = 'wiki/404.html'
+        return render_to_response(request, template, context)
+
+    template = 'wiki/ppdf.tex'
+
+    c = Context(context,autoescape=False)
+    t = loader.get_template(template)
+    latex = t.render(c)
+
+    pdfname = make_pdf(latex)
+    pdffile = open(pdfname, 'rb')
+    outfile = '%s.pdf' % slugify(page.title)
+    response = HttpResponse(pdffile.read(), mimetype='application/pdf')
+    # response['Content-disposition'] = 'attachment; filename=%s' % outfile
+
+    return response

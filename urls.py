@@ -9,10 +9,11 @@ urlpatterns = patterns('',
     url(r'^wiki/$', views.show, name='wiki_root'),
     url(r'^wiki/show/(?P<pg>(([\w\-]+\/)*[\w\-]+)?)/$', views.show, name='wiki_show'),
     url(r'^wiki/edit/(?P<pg>(([\w\-]+\/)*[\w\-]+)?)/$', views.edit, name='wiki_edit'),
+    url(r'^wiki/ppdf/(?P<pg>(([\w\-]+\/)*[\w\-]+)?)/$', views.ppdf, name='wiki_ppdf'),
 
     url(r'^wiki/list/$', views.list_by_name, name='wiki_list'),
     url(r'^wiki/post/$', views.post, name='wiki_post'),
-    url(r'^wiki/edit/$', views.edit, name='wiki_edit_new'),    
+    # url(r'^wiki/edit/$', views.edit, name='wiki_edit_new'),    
 
     url(r'^wiki/login/$', 'django.contrib.auth.views.login', {'template_name': 'wiki/login.html'}, name='wiki_login'),
     url(r'^wiki/logout/$', views.wiki_logout, name='wiki_logout'),
