@@ -9,16 +9,32 @@ import re
 from config import wiki_pages_path
 from config import wiki_image_path
 
+from templatetags.docutils_extensions.utils import get_docinfo
+
 class Page(object):
     def __init__(self, pg):
         self.pg = pg
         self.fp = os.path.abspath(os.path.join(wiki_pages_path, self.pg))
-        if pg:
-            self.title = pg.split('/')[-1]
-        else:
-            self.title = 'WikiRoot'
-        self.title2 = self.title.replace('_', ' ')
 
+    @property
+    def docinfo(self):
+        return get_docinfo(self.raw_content)
+
+    @property
+    def title(self):
+        if 'title' in self.docinfo:
+            title = self.docinfo['title']
+        else:
+            if self.pg:
+                title = self.pg.split('/')[-1]
+            else:
+                title = 'WikiRoot'
+        return title
+
+    @property
+    def title2(self):
+        return self.title.replace('_', ' ')
+        
     @property
     def exists(self):
         return os.path.exists(self.fp)
@@ -73,10 +89,6 @@ class Page(object):
         pattern = r'`(.*) <<\/([\-\w\/]+)>>`_'
         repl = r'`\1 <{}show/\2>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
         content = re.sub(pattern, repl, content)
-
-        if content:
-            if toc:
-                content = '.. contents:: Table of contents\n\n' + content
 
         # Prepend image directory for docutils_extensions
 

@@ -6,7 +6,7 @@
 \usepackage{p200}
 
 \hypersetup{pdftitle = { {{ page.title2 }} } }
-\hypersetup{pdfauthor = { {{ page.author }} }, pdfsubject = {Physics} }
+\hypersetup{pdfauthor = { {{ page.docinfo.author }} }, pdfsubject = {Physics} }
 
 \pagestyle{plain}
 
@@ -20,8 +20,8 @@
 
 \vspace{5mm}
 
-{% if page.author %}
-\small{ \sf {{ page.author }} }
+{% if page.docinfo.author %}
+\small{ \sf {{ page.docinfo.author }} }
 {% endif %}
 
 \small{ \sf {% now "D d M Y" %} }

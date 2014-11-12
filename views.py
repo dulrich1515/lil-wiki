@@ -16,6 +16,7 @@ from config import wiki_pages_path
 
 from utils import render_to_response
 from templatetags.docutils_extensions.utils import make_pdf
+from templatetags.docutils_extensions.utils import rst2latex
 
 from models import *
 
@@ -127,7 +128,7 @@ def post(request):
 def ppdf(request, pg=''):
     # page = Page.objects.get(pg)
     page = Page(pg)
-
+    
     context = {
         'page' : page,
     }
@@ -145,7 +146,7 @@ def ppdf(request, pg=''):
     t = loader.get_template(template)
     latex = t.render(c)
 
-    pdfname = make_pdf(latex)
+    pdfname = make_pdf(latex, repeat=2)
     pdffile = open(pdfname, 'rb')
     outfile = '%s.pdf' % slugify(page.title)
     response = HttpResponse(pdffile.read(), mimetype='application/pdf')

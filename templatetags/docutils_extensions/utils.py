@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import codecs
 import os
+import xml.etree.ElementTree as ET
 
 from subprocess import Popen, PIPE
 
@@ -16,6 +17,43 @@ from config import *
 # Directory to find working folder
 TEMP_PATH = os.path.join(WORK_PATH, 'latex', '_')
 
+## -------------------------------------------------------------------------- ##
+
+def rst2html(source, initial_header_level=2, inline=False, part='body'):
+    if source:
+        source = '.. default-role:: math\n\n' + source
+        writer_name = 'html'
+        
+        settings_overrides = {
+            'compact_lists' : True,
+            'footnote_references' : 'superscript',
+            'math_output' : 'MathJax',
+            'stylesheet_path' : None,
+            'initial_header_level' : initial_header_level,
+            # 'doctitle_xform' : 0,
+        }
+
+        html = publish_parts(
+            source=source,
+            writer_name=writer_name,
+            settings_overrides=settings_overrides,
+        )[part].strip()
+
+        if inline:
+            if html[:3] == '<p>' and html[-4:] == '</p>':
+                html = html[3:-4]
+            
+        html = html.replace('...','&hellip;')
+        html = html.replace('---','&mdash;')
+        html = html.replace('--','&ndash;')
+        # oops ... need to reverse these back
+        html = html.replace('<!&ndash;','<!--')
+        html = html.replace('&ndash;>','-->')
+    else:
+        html = ''
+
+    return mark_safe(html)
+    
 ## -------------------------------------------------------------------------- ##
 
 class MyLatexWriter(latex2e.Writer):
@@ -52,57 +90,45 @@ class MyLatexTranslator0(latex2e.LaTeXTranslator):
 
 ## -------------------------------------------------------------------------- ##
 
-def rst2html(source, initial_header_level=2, inline=False):
-    if source:
-        source = '.. default-role:: math\n\n' + source
-        writer_name = 'html'
-        
-        settings_overrides = {
-            'compact_lists' : True,
-            'footnote_references' : 'superscript',
-            'math_output' : 'MathJax',
-            'stylesheet_path' : None,
-            'initial_header_level' : initial_header_level,
-            'doctitle_xform' : 0,
-        }
-
-        html = publish_parts(
-            source=source,
-            writer_name=writer_name,
-            settings_overrides=settings_overrides,
-        )['body'].strip()
-
-        if inline:
-            if html[:3] == '<p>' and html[-4:] == '</p>':
-                html = html[3:-4]
-            
-        html = html.replace('...','&hellip;')
-        html = html.replace('---','&mdash;')
-        html = html.replace('--','&ndash;')
-        # oops ... need to reverse these back
-        html = html.replace('<!&ndash;','<!--')
-        html = html.replace('&ndash;>','-->')
-    else:
-        html = ''
-
-    return mark_safe(html)
-    
-def rst2latex(source, initial_header_level=-1):
+def rst2latex(source, initial_header_level=-1, part='body'):
     if source:
         source = '.. default-role:: math\n\n' + source
         writer = MyLatexWriter(initial_header_level)
         
-        settings_overrides = {}
+        settings_overrides = {
+            'use_latex_docinfo': True,
+        }
         latex = publish_parts(
             source=source,
             writer=writer,
             settings_overrides=settings_overrides,
-        )['body']
+        )[part]
         latex = latex.replace('-{}','-') # unwind this manipulation from docutils
     else:
         latex = ''
 
     return latex.strip()
+
+## -------------------------------------------------------------------------- ##
+
+def get_docinfo(source):
+
+    text = publish_parts(source=source, writer_name='xml')['whole']
+    root = ET.fromstring(text.encode('utf-8'))
+
+    docinfo = {}
+
+    try:
+        docinfo['title'] = root.find('title').text
+    except:
+        pass
+
+    try:
+        docinfo['author'] = root.find('docinfo').find('author').text
+    except:
+        pass
+
+    return docinfo
 
 ## -------------------------------------------------------------------------- ##
 
