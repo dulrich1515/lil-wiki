@@ -17,11 +17,14 @@
 \begin{document}
 
 \LARGE{ \sf {{ page.title2 }} }
+{% if page.docinfo.subtitle %}
+\small{ \sf {{ page.docinfo.subtitle|rst2latex }} }
+{% endif %}
 
 \vspace{5mm}
 
 {% if page.docinfo.author %}
-\small{ \sf {{ page.docinfo.author }} }
+\small{ \sf {{ page.docinfo.author|rst2latex }} }
 {% endif %}
 
 \small{ \sf {% now "D d M Y" %} }

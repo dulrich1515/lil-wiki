@@ -112,10 +112,20 @@ button[type="submit"] {
 
 #title {
     overflow-x:scroll;
-    margin:1.2em 0 0.3em 0;
+    margin-bottom:0;
     }
 #title::-webkit-scrollbar {
     display: none;
+}
+#subtitle {
+    margin:0.5em 0;
+}
+#author {
+    margin:0.5em 0;
+    font-style:italic;
+}
+#docinfo {
+    margin:1em 0;
 }
 #content {
     overflow-x:hidden;
@@ -182,6 +192,7 @@ button[type="submit"] {
 .related-pages a,
 .related-pages span {
     padding:0.5em;
+    padding-right:1em;
     margin-bottom:3px;
     display:block;
 }
@@ -192,14 +203,15 @@ button[type="submit"] {
     border:1px dashed black;
 }
 
-.parent-link {
+.block-link {
     padding:0.5em;
+    padding-right:1em;
     border:1px solid blue;
     display:inline-block;
 }
 
 .related-pages a:hover,
-.parent-link:hover {
+.block-link:hover {
     text-decoration:none;
     background:white;
 }
@@ -269,7 +281,9 @@ table.series-links td {
     text-align:left;
     width:100%;
 }
-
+.line-block {
+    margin:1em 0;
+}
 
 
 .docutils-extensions.tbl {

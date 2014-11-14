@@ -33,10 +33,14 @@ $(document).keydown(function(e) {
 
 {% block main-content %}
 <div{% if user.is_staff %} ondblclick="location.href='{% url wiki_edit page %}';"{% endif %}>
-    <h1 id="title">{{ page.title }}</h1>
-
-    {% if page.parent %}
-    <p class="noprint">Up to: <a class="parent-link" href="{% url wiki_show page.parent %}">{{ page.parent.title }}</a></p>
+    <div id="docinfo">
+        <h1 id="title">{{ page.title|rst2html_inline }}</h1>
+        {% if page.docinfo.subtitle %}<p id="subtitle">{{ page.docinfo.subtitle|rst2html_inline }}</p>{% endif %}    
+        {% if page.docinfo.author %}<p id="author">Author: {{ page.docinfo.author|rst2html_inline }}</p>{% endif %}
+    </div>
+    
+    {% if page.content %}
+    <a class="block-link noprint" href="#related-pages">Skip down to page navigation</a>
     {% endif %}
 
     {% if page.content %} 
@@ -46,53 +50,55 @@ $(document).keydown(function(e) {
     {% endif %}
 </div>
 
+<a name="related-pages"></a>
+
 {% if page.children or page.series or page.siblings %}
 <div class="related-pages noprint">
     {% if page.children %}
     <p>Down to&hellip;</p>
     <ul>
         {% for page in page.children %}
-        <li><a href="{% url wiki_show page %}">{{ page.title }}</a></li>
+        <li><a href="{% url wiki_show page %}">{{ page.title|rst2html_inline }}</a></li>
         {% endfor %}
     </ul>
     {% endif %}
 
     {% if page.series %}
+    {% comment %}
     <p>In this series&hellip;</p>
     <table class="series-links">
         {% for series_page in page.series %}
         {% if series_page.pg == page.pg %}
         <tr>
-            <td><span>{{ series_page.title }}</span></td>
+            <td><span>{{ series_page.title|rst2html_inline }}</span></td>
             <td>&nbsp; &larr; You are here</td>
         </tr>
         {% else %}
         <tr>
-            <td><a href="{% url wiki_show series_page %}">{{ series_page.title }}</a></td>
+            <td><a href="{% url wiki_show series_page %}">{{ series_page.title|rst2html_inline }}</a></td>
             <td></td>
         </tr>
         {% endif %}
         {% endfor %}
     </table>
-    {% comment %}
+    {% endcomment %}
     <p>In this series&hellip;</p>
     <ul>
         {% for series_page in page.series %}
         {% if series_page.pg == page.pg %}
-        <li><span>{{ series_page.title }}</span></li>
+        <li><span>{{ series_page.title|rst2html_inline }}</span></li>
         {% else %}
-        <li><a href="{% url wiki_show series_page %}">{{ series_page.title }}</a></li>
+        <li><a href="{% url wiki_show series_page %}">{{ series_page.title|rst2html_inline }}</a></li>
         {% endif %}
         {% endfor %}
     </ul>
-    {% endcomment %}
     {% endif %}
 
     {% if not page.children and not page.series and page.siblings %}
     <p>Related pages</p>
     <ul>
         {% for sibling_page in page.siblings %}
-        <li><a href="{% url wiki_show sibling_page %}">{{ sibling_page.title }}</a></li>
+        <li><a href="{% url wiki_show sibling_page %}">{{ sibling_page.title|rst2html_inline }}</a></li>
         {% endfor %}
     </ul>
     {% endif %}
@@ -100,7 +106,7 @@ $(document).keydown(function(e) {
     {% if page.parent %}
     <p>Back up to...</p>
     <ul>
-        <li><a href="{% url wiki_show page.parent %}">{{ page.parent.title }}</a></li>
+        <li><a href="{% url wiki_show page.parent %}">{{ page.parent.title|rst2html_inline }}</a></li>
     </ul>
     {% endif %}
 

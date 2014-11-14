@@ -846,7 +846,7 @@ class problem_set_directive(rst.Directive):
                     if answers in ['show','toggle']:
                         text += '\\marginpar{{\\footnotesize\\sf {0}}}\n'.format(a)
                     text += '\\quad \n{0}\n'.format(q)
-                    if solutions in ['show','toggle']:
+                    if answers in ['show','toggle'] and solutions in ['show','toggle']:
                         text += '\\par \\textbf{{Solution:}}\n\\par {0}\n'.format(s)
                     text += '\n'
         else:

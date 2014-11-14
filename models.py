@@ -6,41 +6,30 @@ import codecs
 import os
 import re
 
+from docutils.core import publish_parts
+
 from config import wiki_pages_path
 from config import wiki_image_path
 
-from templatetags.docutils_extensions.utils import get_docinfo
+from templatetags.docutils_extensions.utils import rst2xml
 
 class Page(object):
     def __init__(self, pg):
         self.pg = pg
         self.fp = os.path.abspath(os.path.join(wiki_pages_path, self.pg))
+        self.exists = os.path.exists(self.fp)        
 
     @property
-    def docinfo(self):
-        return get_docinfo(self.raw_content)
-
-    @property
-    def title(self):
-        if 'title' in self.docinfo:
-            title = self.docinfo['title']
+    def slug(self):
+        if self.pg:
+            slug = self.pg.split('/')[-1]
         else:
-            if self.pg:
-                title = self.pg.split('/')[-1]
-            else:
-                title = 'WikiRoot'
-        return title
-
-    @property
-    def title2(self):
-        return self.title.replace('_', ' ')
+            slug = 'WikiRoot'
+        return slug
         
     @property
-    def exists(self):
-        return os.path.exists(self.fp)
-
-    @property
     def raw_content(self):
+        print "Pulling raw_content for " + self.pg
         raw_content = ''
         fp = self.fp
         if os.path.isdir(self.fp):
@@ -50,13 +39,38 @@ class Page(object):
             raw_content = f.read()
             f.close()
         return raw_content
+    
+    @property
+    def docinfo(self):
+        root = rst2xml(self.raw_content)        
+        docinfo = {}
+        if root.find('title') is not None:
+            docinfo['title'] = root.find('title').text
+        if root.find('subtitle') is not None:
+            docinfo['subtitle'] = root.find('subtitle').text
+        if root.find('docinfo') is not None:
+            for child in root.find('docinfo'):
+                docinfo[child.tag] = child.text
+        return docinfo
+        
+    @property
+    def title(self):
+        if 'title' in self.docinfo:
+            title = self.docinfo['title']
+        else:
+            title = self.slug
+        return title
+    
+    @property
+    def title2(self):
+        title2 = self.title.replace('_', '-')
+        return title2
 
     @property
-    def content(self, toc=False):
-        content = self.raw_content
-
+    def content(self):
         # These MUST go in this order...
         # (is this really the best way to do this?)
+        content = self.raw_content
 
         # 1a. Prepend parent to named child wiki-links
         pattern = r'`(.*) <<([\-\w]+)>>`_'
@@ -67,7 +81,7 @@ class Page(object):
         pattern = r'<<([\-\w]+)>>'
         repl = r'`\1 <</{}/\1>>`_'.format(self.pg)
         content = re.sub(pattern, repl, content)
-
+           
         if self.parent: # wiki_root has no parent...
 
             # 1b. Prepend parent to named sibling wiki-links
@@ -97,7 +111,7 @@ class Page(object):
         content = re.sub(pattern, repl, content)
 
         return content
-
+    
     @property
     def parent(self):
         if self.pg:
@@ -106,7 +120,30 @@ class Page(object):
         else:
             parent = None
         return parent
-
+            
+    @property
+    def children(self):
+        children = self.get_subpages(self, as_list=True)
+        return children
+        
+    @property
+    def siblings(self):
+        siblings = self.get_subpages(self.parent, as_list=True, remove=[self])
+        return siblings
+        
+    @property
+    def series(self):
+        series = []
+        m = re.match('([\w\/]*)_(\d\d\d)$', self.pg)
+        if m: # this page is part of a series
+            for s in self.get_subpages(self.parent, as_list=True):
+                m1 = re.match('([\w\/]*)_(\d\d\d)$', s.pg)
+                if m1:
+                    if m1.group(1) == m.group(1):
+                        series.append(s)
+        series = sorted(series, key=lambda page: page.pg)
+        return series
+        
     def get_subpages(self, page, as_list=False, remove=[]):
         subpages = {'dirs': [], 'files': []}
 
@@ -139,28 +176,6 @@ class Page(object):
 
         return subpages
 
-    @property
-    def children(self):
-        return self.get_subpages(self, as_list=True)
-
-    @property
-    def siblings(self):
-        siblings = self.get_subpages(self.parent, as_list=True, remove=[self])
-        return siblings
-
-    @property
-    def series(self):
-        series = []
-        m = re.match('([\w\/]*)_(\d\d\d)$', self.pg)
-        if m: # this page is part of a series
-            for s in self.get_subpages(self.parent, as_list=True):
-                m1 = re.match('([\w\/]*)_(\d\d\d)$', s.pg)
-                if m1:
-                    print m1.group(1)
-                    if m1.group(1) == m.group(1):
-                        series.append(s)
-        return sorted(series, key=lambda page: page.pg)
-
     def save(self, content):
         fp = self.fp
         if not os.path.isfile(self.fp): # then will have to do something unusual
@@ -189,4 +204,3 @@ class Page(object):
 
     def __unicode__(self):
         return self.pg
-
