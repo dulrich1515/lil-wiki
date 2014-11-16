@@ -39,7 +39,7 @@ def list_by_name(request):
 
 def show(request, pg=''):
     # page = Page.objects.get(pg)
-    page = Page(pg)
+    page = TextPage(pg)
 
     if page.exists:
         template = 'wiki/show.html'
@@ -62,7 +62,7 @@ def edit(request, pg=''):
         return redirect('wiki_root')
 
     # page = Page.objects.get(pg)
-    page = Page(pg)
+    page = TextPage(pg)
 
     template = 'wiki/edit.html'
     context = {
@@ -80,7 +80,7 @@ def post(request):
         content = request.POST['content']
         content = content.replace('\r\n','\n')
 
-        page = Page(new_pg)
+        page = TextPage(new_pg)
 
         if 'cancel' in request.POST:
             return redirect('wiki_show', old_pg)
@@ -127,7 +127,7 @@ def post(request):
     
 def ppdf(request, pg=''):
     # page = Page.objects.get(pg)
-    page = Page(pg)
+    page = TextPage(pg)
     
     context = {
         'page' : page,

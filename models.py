@@ -13,7 +13,7 @@ from config import wiki_image_path
 
 from templatetags.docutils_extensions.utils import rst2xml
 
-class Page(object):
+class TextPage(object):
     def __init__(self, pg):
         self.pg = pg
         self.fp = os.path.abspath(os.path.join(wiki_pages_path, self.pg))
@@ -66,6 +66,7 @@ class Page(object):
         title2 = self.title.replace('_', '-')
         return title2
 
+    # CAN I PULL IN TITLES TO THIS AUTO-LINKS ???
     @property
     def content(self):
         # These MUST go in this order...
@@ -116,7 +117,7 @@ class Page(object):
     def parent(self):
         if self.pg:
             dirs = self.pg.split('/')[:-1]
-            parent = Page('/'.join(dirs))
+            parent = TextPage('/'.join(dirs))
         else:
             parent = None
         return parent
@@ -154,11 +155,11 @@ class Page(object):
                 for pg in sorted(dirs):
                     if page.pg:
                         pg = page.pg + '/' + pg
-                    subpages['dirs'].append(Page(pg))
+                    subpages['dirs'].append(TextPage(pg))
                 for pg in sorted(files):
                     if page.pg:
                         pg = page.pg + '/' + pg
-                    subpages['files'].append(Page(pg))
+                    subpages['files'].append(TextPage(pg))
                 break
 
         for page in subpages['files']:
