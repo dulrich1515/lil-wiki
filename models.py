@@ -2,14 +2,152 @@ from django.db.models import *
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-import codecs
 import os
 import re
 
-from docutils.core import publish_parts
-
 from config import wiki_pages_path
 from config import wiki_image_path
+
+## -------------------------------------------------------------------------- ##
+
+class Page(Model):
+    pg = CharField(max_length=1024, blank=True, unique=True)
+    title = CharField(max_length=256, blank=True)
+    subtitle = CharField(max_length=256, blank=True)
+    author = CharField(max_length=256, blank=True)
+    body_content = TextField(blank=True)
+    parent = ForeignKey('Page', null=True, blank=True, editable=False)
+    
+    create_date = DateTimeField(auto_now_add=True)
+    update_date = DateTimeField(auto_now=True)
+    
+    @property
+    def fp(self):
+        return os.path.abspath(os.path.join(wiki_pages_path, self.pg))
+        
+    @property
+    def slug(self):
+        if self.pg:
+            slug = self.pg.split('/')[-1]
+        else:
+            slug = 'WikiRoot'
+        return slug
+
+    @property
+    def long_title(self):
+        if self.title:
+            return '[{self.slug}] {self.title}'.format(self=self)
+        else:
+            return '[{self.slug}]'.format(self=self)
+
+    @property
+    def title2(self):
+        return self.title.replace('_', '-')
+        
+    @property
+    def raw_content(self):
+        raw_content = ''
+        if self.title:
+            raw_content += '{}\n'.format('=' * len(self.title))
+            raw_content += '{}\n'.format(self.title)
+            raw_content += '{}\n'.format('=' * len(self.title))
+        if self.subtitle:
+            raw_content += '{}\n'.format(self.subtitle)
+            raw_content += '{}\n'.format('~' * len(self.subtitle))
+            raw_content += '\n'
+        if self.author:
+            raw_content += ':author: {}\n'.format(self.author)
+            raw_content += '\n'
+        raw_content += self.body_content
+        return raw_content
+        
+    # CAN I PULL IN TITLES TO THIS AUTO-LINKS ???
+    @property
+    def content(self):
+        # These MUST go in this order...
+        # (is this really the best way to do this?)
+        content = self.raw_content
+
+        # 1a. Prepend parent to named child wiki-links
+        pattern = r'`(.*) <<([\-\w]+)>>`_'
+        repl = r'`\1 <</{}/\2>>`_'.format(self.pg)
+        content = re.sub(pattern, repl, content)
+
+        # 2a. Prepend parent to remaining child wiki-links
+        pattern = r'<<([\-\w]+)>>'
+        repl = r'`\1 <</{}/\1>>`_'.format(self.pg)
+        content = re.sub(pattern, repl, content)
+           
+        if self.parent: # wiki_root has no parent...
+
+            # 1b. Prepend parent to named sibling wiki-links
+            pattern = r'`(.*) <<\.\/([\-\w]+)>>`_'
+            repl = r'`\1 <</{}/\2>>`_'.format(self.parent.pg)
+            content = re.sub(pattern, repl, content)
+
+            # 2b. Prepend parent to remaining sibling wiki-links
+            pattern = r'<<\.\/([\-\w]+)>>'
+            repl = r'`\1 <</{}/\1>>`_'.format(self.parent.pg)
+            content = re.sub(pattern, repl, content)
+
+        # 3. Expand lone wiki-links (must start with slash)
+        pattern = r'<</([\-\w\/]+)>>([^`])' # looking for back-tick to avoid converting the named links twice...
+        repl = r'`\1 <</\1>>`_\2'
+        content = re.sub(pattern, repl, content)
+
+        # 4. Auto-link all wiki-pages
+        pattern = r'`(.*) <<\/([\-\w\/]+)>>`_'
+        repl = r'`\1 <{}show/\2>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
+        content = re.sub(pattern, repl, content)
+
+        # Prepend image directory for docutils_extensions
+
+        pattern = r'\\includegraphics(.*){(.*)}'
+        repl = r'\\includegraphics\1{{{0}/\2}}'.format(wiki_image_path)
+        content = re.sub(pattern, repl, content)
+
+        return content
+        
+    @property
+    def children(self):
+        return Page.objects.find(parent=self)
+        
+    @property
+    def siblings(self):
+        return Page.objects.find(parent=self.parent).exclude(self)
+        
+    @property
+    def series(self):
+        series = []
+        m = re.match('([\w\/]*)_(\d\d\d)$', self.pg)
+        if m: # this page is part of a series
+            for s in Page.objects.find(parent=self.parent):
+                m1 = re.match('([\w\/]*)_(\d\d\d)$', s.pg)
+                if m1:
+                    if m1.group(1) == m.group(1):
+                        series.append(s)
+        series = sorted(series, key=lambda page: page.pg)
+        return series
+        
+    def save(self, *args, **kwargs):
+        if self.pg:
+            parent_pg = self.pg.rsplit('/')[0]
+            try:
+                parent = Page.objects.get(pg=parent_pg)
+            except:
+                parent = Page(pg=parent_pg)
+                parent.save()
+        super(Page, self).save(*args, **kwargs)
+
+    def __unicode__(self):
+        return self.pg    
+
+    class Meta:
+        ordering = ['pg']
+
+## -------------------------------------------------------------------------- ##
+
+import codecs
 
 from templatetags.docutils_extensions.utils import rst2xml
 

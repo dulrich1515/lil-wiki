@@ -6,7 +6,7 @@
 \usepackage{p200}
 
 \hypersetup{pdftitle = { {{ page.title2 }} } }
-\hypersetup{pdfauthor = { {{ page.docinfo.author }} }, pdfsubject = {Physics} }
+\hypersetup{pdfauthor = { {{ page.author }} }, pdfsubject = {Physics} }
 
 \pagestyle{plain}
 
@@ -16,15 +16,15 @@
 
 \begin{document}
 
-\LARGE{ \sf {{ page.title2 }} }
-{% if page.docinfo.subtitle %}
-\small{ \sf {{ page.docinfo.subtitle|rst2latex }} }
+\LARGE{ \sf {{ page.title2|rst2latex }} }
+{% if page.subtitle %}
+\small{ \sf {{ page.subtitle|rst2latex }} }
 {% endif %}
 
 \vspace{5mm}
 
-{% if page.docinfo.author %}
-\small{ \sf {{ page.docinfo.author|rst2latex }} }
+{% if page.author %}
+\small{ \sf {{ page.author|rst2latex }} }
 {% endif %}
 
 \small{ \sf {% now "D d M Y" %} }

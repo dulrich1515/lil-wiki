@@ -35,8 +35,8 @@ $(document).keydown(function(e) {
 <div{% if user.is_staff %} ondblclick="location.href='{% url wiki_edit page %}';"{% endif %}>
     <div id="docinfo">
         <h1 id="title">{{ page.title|rst2html_inline }}</h1>
-        {% if page.docinfo.subtitle %}<p id="subtitle">{{ page.docinfo.subtitle|rst2html_inline }}</p>{% endif %}    
-        {% if page.docinfo.author %}<p id="author">Author: {{ page.docinfo.author|rst2html_inline }}</p>{% endif %}
+        {% if page.subtitle %}<p id="subtitle">{{ page.subtitle|rst2html_inline }}</p>{% endif %}    
+        {% if page.author %}<p id="author">Author: {{ page.author|rst2html_inline }}</p>{% endif %}
     </div>
     
     {% if page.content %}

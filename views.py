@@ -37,11 +37,19 @@ def list_by_name(request):
     return render_to_response(request, template, context)
 
 
-def show(request, pg=''):
-    # page = Page.objects.get(pg)
-    page = TextPage(pg)
+def show(request, pg='_'):
+    if not pg:
+        return redirect('wiki_root')
+    if pg == '_':
+        pg = ''
+        
+    # page = TextPage(pg)
+    try:
+        page = Page.objects.get(pg=pg)
+    except:
+        page = None
 
-    if page.exists:
+    if page:
         template = 'wiki/show.html'
     else:
         if request.user.is_authenticated():
@@ -57,12 +65,15 @@ def show(request, pg=''):
 # @login_required(login_url=reverse('wiki_login')) # not sure why this doesn't work....
 @login_required(login_url='/wiki/login/')
 def edit(request, pg=''):
-# blank will create a *new* page, but how to edit WikiRoot page?
     if not request.user.is_staff:
         return redirect('wiki_root')
 
-    # page = Page.objects.get(pg)
-    page = TextPage(pg)
+    # page = TextPage(pg)
+    try:
+        page = Page.objects.get(pg=pg)
+    except:
+        page = Page(pg=pg)
+        page.save()
 
     template = 'wiki/edit.html'
     context = {
@@ -80,54 +91,80 @@ def post(request):
         content = request.POST['content']
         content = content.replace('\r\n','\n')
 
-        page = TextPage(new_pg)
-
+        # not using a try clause here since this should always exist
+        # so if something bad happens this will crap out here ...
+        page = Page.objects.get(pg=old_pg)
+        
         if 'cancel' in request.POST:
             return redirect('wiki_show', old_pg)
-
+            
         elif 'delete' in request.POST:
-            if os.path.isfile(page.fp): # error check --- it should exist (create before you annhilate)
-                os.remove(page.fp)
-
-            while page.parent: # check if the directory is now empty --- if so, demote the directory
-                path, dirs, files = next(os.walk(page.parent.fp))
-                if dirs: # don't delete if there are subdirectories
-                    break
-                else: # there are no subdirectories
-                    if files and files != ['_']: # don't delete if there are other files
-                        break
-                    else: # the directory is effectively empty
-                        fp = page.parent.fp
-                        if files == ['_']: # capture this special content if it is there
-                            os.rename(fp + '/_', fp + '__')
-                        os.rmdir(fp) # delete the directory
-                        if os.path.isfile(fp + '__'): # remove the special content tag
-                            os.rename(fp + '__', fp)
-                page = page.parent
-
-            return redirect('wiki_show', page.parent)
-
+            parent = page.parent
+            page.delete()
+            return redirect('wiki_show', parent.pg)
+        
         elif 'update' in request.POST or 'submit' in request.POST:
-            page.save(content)
-
-            if new_pg.lower() != old_pg.lower(): # case-sensitivity issue here?
-            # then pg was changed ... need to delete old file
-                fp = os.path.join(wiki_pages_path, old_pg)
-                if os.path.isfile(fp):
-                    os.remove(fp)
-
+            page.pg = new_pg
+            page.body_content = content
+            page.save()
             if 'update' in request.POST:
-                return redirect('wiki_edit', new_pg)
+                return redirect('wiki_edit', page.pg)
             else:
-                return redirect('wiki_show', new_pg)
+                return redirect('wiki_show', page.pg)
 
-    # nothing should get here...
+    # nothing should ever get here...
     return redirect('wiki_root')
+    
+
+    
+        # page = TextPage(new_pg)
+            
+        # if 'cancel' in request.POST:
+            # return redirect('wiki_show', old_pg)
+
+        # elif 'delete' in request.POST:
+            # if os.path.isfile(page.fp): # error check --- it should exist (create before you annhilate)
+                # os.remove(page.fp)
+
+            # while page.parent: # check if the directory is now empty --- if so, demote the directory
+                # path, dirs, files = next(os.walk(page.parent.fp))
+                # if dirs: # don't delete if there are subdirectories
+                    # break
+                # else: # there are no subdirectories
+                    # if files and files != ['_']: # don't delete if there are other files
+                        # break
+                    # else: # the directory is effectively empty
+                        # fp = page.parent.fp
+                        # if files == ['_']: # capture this special content if it is there
+                            # os.rename(fp + '/_', fp + '__')
+                        # os.rmdir(fp) # delete the directory
+                        # if os.path.isfile(fp + '__'): # remove the special content tag
+                            # os.rename(fp + '__', fp)
+                # page = page.parent
+
+            # return redirect('wiki_show', page.parent)
+
+        # elif 'update' in request.POST or 'submit' in request.POST:
+            # page.save(content)
+
+            # if new_pg.lower() != old_pg.lower(): # case-sensitivity issue here?
+            # # then pg was changed ... need to delete old file
+                # fp = os.path.join(wiki_pages_path, old_pg)
+                # if os.path.isfile(fp):
+                    # os.remove(fp)
+
+            # if 'update' in request.POST:
+                # return redirect('wiki_edit', new_pg)
+            # else:
+                # return redirect('wiki_show', new_pg)
+
+    # # nothing should get here...
+    # return redirect('wiki_root')
 
     
 def ppdf(request, pg=''):
-    # page = Page.objects.get(pg)
-    page = TextPage(pg)
+    page = Page.objects.get(pg)
+    # page = TextPage(pg)
     
     context = {
         'page' : page,
