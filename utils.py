@@ -18,7 +18,7 @@ import sys
 from models import Page
 from config import wiki_pages_path
 
-def loaddata():
+def loaddata(pull_docinfo=False):
     '''
     Designed to be run from shell. 
     Will wipe DB and load data from file system.
@@ -53,4 +53,4 @@ def loaddata():
     for pg in sorted(pg_list):
         print 'Creating: ', pg
         page = Page(pg=pg)
-        page.update(pull_docinfo=False)
+        page.update(pull_docinfo=pull_docinfo)
