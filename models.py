@@ -2,20 +2,24 @@ from django.db.models import *
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
+import codecs
 import os
 import re
 
 from config import wiki_pages_path
 from config import wiki_image_path
 
+from templatetags.docutils_extensions.utils import rst2xml
+
 ## -------------------------------------------------------------------------- ##
 
 class Page(Model):
     pg = CharField(max_length=1024, blank=True, unique=True)
-    title = CharField(max_length=256, blank=True)
-    subtitle = CharField(max_length=256, blank=True)
-    author = CharField(max_length=256, blank=True)
-    body_content = TextField(blank=True)
+    raw_content = TextField(blank=True)    
+    
+    raw_title = CharField(max_length=256, blank=True, editable=False)
+    subtitle = CharField(max_length=256, blank=True, editable=False)
+    author = CharField(max_length=256, blank=True, editable=False)
     parent = ForeignKey('Page', null=True, blank=True, editable=False)
     
     create_date = DateTimeField(auto_now_add=True)
@@ -23,43 +27,36 @@ class Page(Model):
     
     @property
     def fp(self):
-        return os.path.abspath(os.path.join(wiki_pages_path, self.pg))
-        
+        fp = os.path.abspath(os.path.join(wiki_pages_path, self.pg[1:]))
+        if os.path.isdir(fp):
+            fp = os.path.abspath(os.path.join(wiki_pages_path, self.pg[1:], '_'))
+        return fp
+
     @property
     def slug(self):
         if self.pg != '/':
-            slug = self.pg.split('/')[-1]
+            slug = self.pg.split('/')[-2]
         else:
             slug = 'WikiRoot'
         return slug
 
     @property
-    def long_title(self):
-        if self.title:
-            return '[{self.slug}] {self.title}'.format(self=self)
+    def title(self):
+        if self.raw_title:
+            return self.raw_title
         else:
-            return '[{self.slug}]'.format(self=self)
+            return self.slug
 
     @property
     def title2(self):
         return self.title.replace('_', '-')
-        
+    
     @property
-    def raw_content(self):
-        raw_content = ''
-        if self.title:
-            raw_content += '{}\n'.format('=' * len(self.title))
-            raw_content += '{}\n'.format(self.title)
-            raw_content += '{}\n'.format('=' * len(self.title))
-        if self.subtitle:
-            raw_content += '{}\n'.format(self.subtitle)
-            raw_content += '{}\n'.format('~' * len(self.subtitle))
-            raw_content += '\n'
-        if self.author:
-            raw_content += ':author: {}\n'.format(self.author)
-            raw_content += '\n'
-        raw_content += self.body_content
-        return raw_content
+    def long_title(self):
+        if self.raw_title:
+            return '[{self.slug}] {self.title}'.format(self=self)
+        else:
+            return '[{self.slug}]'.format(self=self)
         
     # CAN I PULL IN TITLES TO THIS AUTO-LINKS ???
     @property
@@ -110,18 +107,18 @@ class Page(Model):
         
     @property
     def children(self):
-        return Page.objects.find(parent=self)
+        return Page.objects.filter(parent=self)
         
     @property
     def siblings(self):
-        return Page.objects.find(parent=self.parent).exclude(self)
+        return Page.objects.filter(parent=self.parent).exclude(self)
         
     @property
     def series(self):
         series = []
         m = re.match('([\w\/]*)_(\d\d\d)$', self.pg)
         if m: # this page is part of a series
-            for s in Page.objects.find(parent=self.parent):
+            for s in Page.objects.filter(parent=self.parent):
                 m1 = re.match('([\w\/]*)_(\d\d\d)$', s.pg)
                 if m1:
                     if m1.group(1) == m.group(1):
@@ -129,14 +126,56 @@ class Page(Model):
         series = sorted(series, key=lambda page: page.pg)
         return series
         
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):    
+        root = rst2xml(self.raw_content)
+        
+        self.raw_title = ''
+        if root.find('title') is not None:
+            self.raw_title = root.find('title').text
+            
+        self.subtitle = ''
+        if root.find('subtitle') is not None:
+            self.subtitle = root.find('subtitle').text
+        
+        self.author = ''
+        if root.find('docinfo') is not None:
+            if root.find('docinfo').find('author') is not None:
+                self.author = root.find('docinfo').find('author').text
+                
         if self.pg != '/':
-            parent_pg = self.pg.split('/')[:-1]
+            dirs = self.pg.split('/')
+            parent_pg = '/'.join(dirs[:-2] + dirs[:1])
             try:
                 parent = Page.objects.get(pg=parent_pg)
             except:
                 parent = Page(pg=parent_pg)
                 parent.save()
+            self.parent = parent
+            
+        # save a copy to the file system
+
+        fp = self.fp
+        if not os.path.isfile(fp): # then will have to do something unusual
+            if os.path.isdir(fp): # then save the content in a special file
+                fp = fp + '/_'
+            else: # the page doesn't exist --- before we build it, we need to
+                  # make sure the directory structure is compatible
+                dirs = self.pg.split('/')
+                fp = wiki_pages_path
+                for d in dirs[:-1]: # these directories should all exist
+                    fp = os.path.join(fp, d)
+                    if os.path.isfile(fp): # then we need to prepare to push this content into a new directory
+                        os.rename(fp, fp + '__')
+                    if not os.path.isdir(fp): # then we need to create it
+                        os.mkdir(fp)
+                    if os.path.isfile(fp + '__'): # then pull this special content into the new directory
+                        os.rename(fp + '__', fp + '/_')
+                fp = self.fp # reset in order to prepare to save the content
+
+        f = codecs.open(fp, 'w+', 'utf-8')
+        f.write(self.content.strip())
+        f.close
+
         super(Page, self).save(*args, **kwargs)
 
     def __unicode__(self):
@@ -316,10 +355,9 @@ class TextPage(object):
         return subpages
 
     def save(self, content):
-        fp = self.fp
         if not os.path.isfile(self.fp): # then will have to do something unusual
             if os.path.isdir(self.fp): # then save the content in a special file
-                fp = fp + '/_'
+                fp = fp + '_'
             else: # the page doesn't exist --- before we build it, we need to
                   # make sure the directory structure is compatible
                 dirs = self.pg.split('/')
@@ -331,7 +369,7 @@ class TextPage(object):
                     if not os.path.isdir(fp): # then we need to create it
                         os.mkdir(fp)
                     if os.path.isfile(fp + '__'): # then pull this special content into the new directory
-                        os.rename(fp + '__', fp + '/_')
+                        os.rename(fp + '__', fp + '_')
                 fp = self.fp # reset in order to prepare to save the content
 
         f = codecs.open(fp, 'w+', 'utf-8')

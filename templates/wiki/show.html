@@ -39,8 +39,10 @@ $(document).keydown(function(e) {
         {% if page.author %}<p id="author">Author: {{ page.author|rst2html_inline }}</p>{% endif %}
     </div>
     
+    {% if page.children or page.series or page.siblings or page.parent %}
     {% if page.content %}
     <a class="block-link noprint" href="#related-pages">Skip down to page navigation</a>
+    {% endif %}
     {% endif %}
 
     {% if page.content %} 
@@ -52,7 +54,7 @@ $(document).keydown(function(e) {
 
 <a name="related-pages"></a>
 
-{% if page.children or page.series or page.siblings %}
+{% if page.children or page.series or page.siblings or page.parent %}
 <div class="related-pages noprint">
     {% if page.children %}
     <p>Down to&hellip;</p>
@@ -64,24 +66,6 @@ $(document).keydown(function(e) {
     {% endif %}
 
     {% if page.series %}
-    {% comment %}
-    <p>In this series&hellip;</p>
-    <table class="series-links">
-        {% for series_page in page.series %}
-        {% if series_page.pg == page.pg %}
-        <tr>
-            <td><span>{{ series_page.title|rst2html_inline }}</span></td>
-            <td>&nbsp; &larr; You are here</td>
-        </tr>
-        {% else %}
-        <tr>
-            <td><a href="{% url wiki_show series_page %}">{{ series_page.title|rst2html_inline }}</a></td>
-            <td></td>
-        </tr>
-        {% endif %}
-        {% endfor %}
-    </table>
-    {% endcomment %}
     <p>In this series&hellip;</p>
     <ul>
         {% for series_page in page.series %}

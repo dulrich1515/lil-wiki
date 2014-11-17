@@ -192,7 +192,7 @@ button[type="submit"] {
 .related-pages a,
 .related-pages span {
     padding:0.5em;
-    padding-right:1em;
+    /* padding-right:1em; */
     margin-bottom:3px;
     display:block;
 }

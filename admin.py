@@ -5,9 +5,8 @@ from models import *
 
 class PageAdmin(ModelAdmin):
     # list_filter = []
-    list_display = ['long_title', 'pg']
+    list_display = ['pg', 'raw_title', 'update_date']
     # fields = []
-    # readonly_fields = ['parent']
-    pass
+    readonly_fields = ['parent', 'raw_title', 'subtitle', 'author']
     
 site.register(Page, PageAdmin)

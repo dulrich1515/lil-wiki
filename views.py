@@ -1,7 +1,9 @@
 from __future__ import division
 from __future__ import unicode_literals
 
+import codecs
 import os
+from datetime import datetime
 
 from django.contrib.auth import logout as logout
 from django.contrib.auth.decorators import login_required
@@ -30,7 +32,32 @@ def wiki_logout(request):
 
 
 def show(request, pg='/'):
-    try:
+    try:        
+        page = Page.objects.get(pg=pg)
+    except:
+        page = None
+        
+    # check file system for updated version
+    fp = os.path.abspath(os.path.join(wiki_pages_path, pg[1:]))
+    if os.path.isdir(fp): # then content may be in a special file
+        fp = os.path.abspath(os.path.join(wiki_pages_path, pg[1:], '_'))
+    if os.path.isfile(fp):
+        skip_update = False
+        if page:
+            mod_timestamp = os.path.getmtime(fp)
+            mod_datetime = datetime.datetime.fromtimestamp(mod_timestamp)
+            if mod_datetime < page.update_date:
+                skip_update = True
+        if not skip_update:
+            f = codecs.open(fp, 'r+', 'utf-8')
+            raw_content = f.read()
+            f.close
+            if not page:
+                page = Page(pg=pg)
+            page.raw_content = raw_content
+            page.save()
+            
+    try:        
         page = Page.objects.get(pg=pg)
         template = 'wiki/show.html'
     except:
@@ -62,8 +89,9 @@ def edit(request, pg='/'):
 
 def post(request):
     if request.user.is_staff and request.method == 'POST':
-        pg = request.POST['pg']
-
+        pg = request.POST['pg'] + '/'
+        pg = pg.replace('//', '/')
+        
         if 'cancel' in request.POST:
             return redirect('wiki_show', pg)
 
@@ -81,15 +109,15 @@ def post(request):
             else:
                 return redirect('wiki_root')
         
-        new_pg = request.POST['new_pg']
-        # new_pg = re.sub('[\/]+$', '', new_pg) # cut any trailing slashes off...
+        new_pg = request.POST['new_pg'] + '/'
+        new_pg = new_pg.replace('//', '/')
         # new_pg = re.sub('[^\w^\/]+', '', new_pg) # poor man's validation attempt
         content = request.POST['content']
         content = content.replace('\r\n','\n')
 
         if 'update' in request.POST or 'submit' in request.POST:
             page.pg = new_pg
-            page.body_content = content
+            page.raw_content = content
             page.save()
             if 'update' in request.POST:
                 return redirect('wiki_edit', page.pg)
@@ -98,6 +126,7 @@ def post(request):
 
     # nothing should ever get here...
     return redirect('wiki_root')
+    
     
 def ppdf(request, pg=''):
     page = Page.objects.get(pg)
