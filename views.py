@@ -31,34 +31,10 @@ def wiki_logout(request):
         return redirect('wiki_root')
 
 
-def show(request, pg='/'):
+def show(request, pg='/'):            
     try:        
         page = Page.objects.get(pg=pg)
-    except:
-        page = None
-        
-    # check file system for updated version
-    fp = os.path.abspath(os.path.join(wiki_pages_path, pg[1:]))
-    if os.path.isdir(fp): # then content may be in a special file
-        fp = os.path.abspath(os.path.join(wiki_pages_path, pg[1:], '_'))
-    if os.path.isfile(fp):
-        skip_update = False
-        if page:
-            mod_timestamp = os.path.getmtime(fp)
-            mod_datetime = datetime.datetime.fromtimestamp(mod_timestamp)
-            if mod_datetime < page.update_date:
-                skip_update = True
-        if not skip_update:
-            f = codecs.open(fp, 'r+', 'utf-8')
-            raw_content = f.read()
-            f.close
-            if not page:
-                page = Page(pg=pg)
-            page.raw_content = raw_content
-            page.save()
-            
-    try:        
-        page = Page.objects.get(pg=pg)
+        page.update()
         template = 'wiki/show.html'
     except:
         if request.user.is_authenticated:
