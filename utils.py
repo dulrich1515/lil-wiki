@@ -13,21 +13,17 @@ def render_to_response(request, template, context):
 ## -------------------------------------------------------------------------- ##
 
 import os
+import shutil
 import sys
 
 from models import Page
 from config import wiki_pages_path
+from templatetags.docutils_extensions.config import SYSGEN_FOLDER
 
-def loaddata(pull_docinfo=False):
+def rebuild(pull_docinfo=True, wipe_sysgen=False):
     '''
     Designed to be run from shell. 
     Will wipe DB and load data from file system.
-    
-    .. ::
-    
-        python manage.py shell
-        >>> import apps.wiki.utils as utils
-        >>> utils.loaddata()
     '''
     pg_list = []
     for root, dirs, files in os.walk(wiki_pages_path):
@@ -49,6 +45,15 @@ def loaddata(pull_docinfo=False):
         
     print 'Deleting all Page data'
     Page.objects.all().delete()
+
+    if wipe_sysgen:
+        print 'Wiping sysgen'
+        for file in os.listdir(SYSGEN_FOLDER):
+            file_path = os.path.join(SYSGEN_FOLDER, file)
+            if os.isdir(file_path):
+                shutil.rmtree(file_path)
+            else:
+                os.unlink(file_path)
 
     for pg in sorted(pg_list):
         print 'Creating: ', pg
