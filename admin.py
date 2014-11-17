@@ -8,5 +8,6 @@ class PageAdmin(ModelAdmin):
     list_display = ['long_title', 'pg']
     # fields = []
     # readonly_fields = ['parent']
+    pass
     
 site.register(Page, PageAdmin)

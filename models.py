@@ -27,7 +27,7 @@ class Page(Model):
         
     @property
     def slug(self):
-        if self.pg:
+        if self.pg != '/':
             slug = self.pg.split('/')[-1]
         else:
             slug = 'WikiRoot'
@@ -130,8 +130,8 @@ class Page(Model):
         return series
         
     def save(self, *args, **kwargs):
-        if self.pg:
-            parent_pg = self.pg.rsplit('/')[0]
+        if self.pg != '/':
+            parent_pg = self.pg.split('/')[:-1]
             try:
                 parent = Page.objects.get(pg=parent_pg)
             except:

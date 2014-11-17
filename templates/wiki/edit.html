@@ -13,7 +13,6 @@
 <div id="sign_up">
 <form id="editor" method="post" action="{% url wiki_post %}">
     <p><textarea class="editarea" id="content" name="content">{{ page.body_content }}</textarea></p>
-    
     <p><input type="text" class="editarea" id="title" name="new_pg" value="{{ page.pg }}"></p>
 
     <div id="editor-controls">
@@ -26,7 +25,7 @@
         </ul>
     </div>
 
-    <input type="hidden" name="old_pg" value="{{ page.pg }}">
+    <input type="hidden" name="pg" value="{{ page.pg }}">
     {% csrf_token %}
 </form>
 {% endblock %}
