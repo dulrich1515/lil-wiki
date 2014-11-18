@@ -67,12 +67,12 @@ class Page(Model):
 
         # 1a. Prepend parent to named child wiki-links
         pattern = r'`(.*) <<([\-\w]+)>>`_'
-        repl = r'`\1 <</{}/\2>>`_'.format(self.pg)
+        repl = r'`\1 <<{}\2>>`_'.format(self.pg)
         content = re.sub(pattern, repl, content)
 
         # 2a. Prepend parent to remaining child wiki-links
         pattern = r'<<([\-\w]+)>>'
-        repl = r'`\1 <</{}/\1>>`_'.format(self.pg)
+        repl = r'`\1 <<{}\1>>`_'.format(self.pg)
         content = re.sub(pattern, repl, content)
            
         if self.parent: # wiki_root has no parent...
@@ -94,7 +94,7 @@ class Page(Model):
 
         # 4. Auto-link all wiki-pages
         pattern = r'`(.*) <<\/([\-\w\/]+)>>`_'
-        repl = r'`\1 <{}show/\2>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
+        repl = r'`\1 <{}show/\2/>`_'.format(reverse('wiki_root')) # need to fix this ugly reversal !!!
         content = re.sub(pattern, repl, content)
 
         # Prepend image directory for docutils_extensions
@@ -182,7 +182,7 @@ class Page(Model):
                 fp = self.fp # reset in order to prepare to save the content
 
         f = codecs.open(fp, 'w+', 'utf-8')
-        f.write(self.content.strip())
+        f.write(self.raw_content.strip())
         f.close
 
         super(Page, self).save(*args, **kwargs)
