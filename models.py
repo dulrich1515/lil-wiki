@@ -111,7 +111,7 @@ class Page(Model):
         
     @property
     def siblings(self):
-        return Page.objects.filter(parent=self.parent).exclude(self)
+        return Page.objects.filter(parent=self.parent).exclude(page=self)
         
     @property
     def series(self):
