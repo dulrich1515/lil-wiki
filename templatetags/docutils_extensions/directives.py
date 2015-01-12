@@ -534,6 +534,12 @@ class fig_directive(rst.Directive):
                 p = Popen(cmd,stdout=PIPE,stderr=PIPE)
                 out, err = p.communicate()
 
+                print '* Running LaTeX (temp.tex --> temp.pdf)'
+                cmd = os.path.join(LATEX_PATH, 'pdflatex')
+                cmd = [cmd, '--interaction=nonstopmode', 'temp.tex']
+                p = Popen(cmd,stdout=PIPE,stderr=PIPE)
+                out, err = p.communicate()
+
                 print '* Running Ghostscript (temp.pdf --> temp.png)'
                 cmd = [GS_COMMAND,
                 '-q',
