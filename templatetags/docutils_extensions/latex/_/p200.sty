@@ -199,6 +199,13 @@
 \tikzstyle {every pin} = [fill=white]
 \tikzstyle {baseline} = [text depth=0.25ex,text height=1.75ex]
 
+
+
+% from http://tex.stackexchange.com/questions/191217/arrow-pointing-to-subscript-in-equation
+\newcommand\tikzmark[1]{\tikz[remember picture,overlay]\coordinate (#1);}
+
+
+
 % mechanics
 
 \tikzstyle {forcearrow} = [draw,fill=black,fill opacity=0.25,single arrow,shape border uses incircle,scale=0.5,minimum height=1cm]
