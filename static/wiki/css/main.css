@@ -284,7 +284,11 @@ table.series-links td {
 .line-block {
     margin:1em 0;
 }
-
+.rubric {
+    line-height:2em;
+    text-align:center;
+    font-style:italic;
+}
 
 .docutils-extensions.tbl {
     overflow-x:auto;
