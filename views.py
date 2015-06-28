@@ -105,7 +105,7 @@ def post(request):
     
     
 def ppdf(request, pg=''):
-    page = Page.objects.get(pg)
+    page = Page.objects.get(pg=pg)
     
     context = {
         'page' : page,
