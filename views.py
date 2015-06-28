@@ -105,19 +105,14 @@ def post(request):
     
     
 def ppdf(request, pg=''):
-    page = Page.objects.get(pg=pg)
-    
+    try:        
+        page = Page.objects.get(pg=pg)
+    except:
+        return redirect('wiki_show', pg)
+
     context = {
         'page' : page,
     }
-
-    if not page.exists:
-        if request.user.is_authenticated():
-            template = 'wiki/edit.html'
-        else:
-            template = 'wiki/404.html'
-        return render_to_response(request, template, context)
-
     template = 'wiki/ppdf.tex'
 
     c = Context(context,autoescape=False)
