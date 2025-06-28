@@ -35,27 +35,28 @@ def rebuild(pull_docinfo=True, wipe_sysgen=False):
                 pg = pg[:-1]
             else:
                 pg = pg + '/'
-            print pg
+            print(pg)
             pg_list.append(pg)
 
     confirm = raw_input('About to create {} pages. Ready to wipe DB ([y]/n)? '.format(len(pg_list)))
     if confirm and confirm.upper() != 'Y':
-        print 'Aborting...'
+        print('Aborting...')
         sys.exit()
-        
-    print 'Deleting all Page data'
+
+    print('Deleting all Page data')
     Page.objects.all().delete()
 
     if wipe_sysgen:
-        print 'Wiping sysgen'
+        print('Wiping sysgen')
         for file in os.listdir(SYSGEN_FOLDER):
             file_path = os.path.join(SYSGEN_FOLDER, file)
-            if os.isdir(file_path):
+            if os.path.isdir(file_path):
                 shutil.rmtree(file_path)
             else:
                 os.unlink(file_path)
 
     for pg in sorted(pg_list):
-        print 'Creating: ', pg
+        print('Creating: ', pg)
         page = Page(pg=pg)
         page.update(pull_docinfo=pull_docinfo)
+
